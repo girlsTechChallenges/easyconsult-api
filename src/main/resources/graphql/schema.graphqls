@@ -1,0 +1,72 @@
+# ========================
+# Types
+# ========================
+
+enum ConsultationStatus {
+    SCHEDULED
+    CONFIRMED
+    CANCELLED
+}
+
+type Patient {
+    name: String
+    email: String
+}
+
+type ConsultationResponseDto {
+    id: ID!
+    patient: Patient
+    nameProfessional: String
+    consultationDate: String
+    statusConsultation: ConsultationStatus
+    reason: String
+}
+
+# ========================
+# Inputs
+# ========================
+
+input PatientDataDto {
+    name: String
+    email: String
+}
+
+input ProfessionalDataDto {
+    name: String
+    email: String
+}
+
+input ConsultationRequestDto {
+    patient: PatientDataDto!
+    professional: ProfessionalDataDto!
+    dateTime: String!
+    reason: String!
+}
+
+input ConsultationFilterInput {
+    patientEmail: String
+    professionalEmail: String
+    status: ConsultationStatus
+    startDate: String
+    endDate: String
+}
+
+
+# ========================
+# Queries
+# ========================
+
+type Query {
+    getConsultationById(id: ID!): ConsultationResponseDto
+    getAllConsultations: [ConsultationResponseDto!]!
+    getFilteredConsultations(filter: ConsultationFilterInput): [ConsultationResponseDto!]!
+}
+
+# ========================
+# Mutations
+# ========================
+type Mutation {
+    createFullConsultation(input: ConsultationRequestDto!): ConsultationResponseDto!
+    updateConsultationStatus(id: ID!, status: ConsultationStatus!): ConsultationResponseDto!
+    cancelConsultation(id: ID!): ConsultationResponseDto!
+}
