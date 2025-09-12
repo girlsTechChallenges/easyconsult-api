@@ -43,6 +43,15 @@ input ConsultationRequestDto {
     reason: String!
 }
 
+input ConsultationFilterInput {
+    patientEmail: String
+    professionalEmail: String
+    status: ConsultationStatus
+    startDate: String
+    endDate: String
+}
+
+
 # ========================
 # Queries
 # ========================
@@ -50,12 +59,14 @@ input ConsultationRequestDto {
 type Query {
     getConsultationById(id: ID!): ConsultationResponseDto
     getAllConsultations: [ConsultationResponseDto!]!
+    getFilteredConsultations(filter: ConsultationFilterInput): [ConsultationResponseDto!]!
 }
 
 # ========================
 # Mutations
 # ========================
-
 type Mutation {
     createFullConsultation(input: ConsultationRequestDto!): ConsultationResponseDto!
+    updateConsultationStatus(id: ID!, status: ConsultationStatus!): ConsultationResponseDto!
+    cancelConsultation(id: ID!): ConsultationResponseDto!
 }
