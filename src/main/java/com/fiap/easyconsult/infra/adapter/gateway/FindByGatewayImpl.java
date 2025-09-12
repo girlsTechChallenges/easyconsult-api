@@ -1,13 +1,13 @@
 package com.fiap.easyconsult.infra.adapter.gateway;
 
 import com.fiap.easyconsult.core.domain.model.Consult;
-import com.fiap.easyconsult.core.domain.model.Patient;
-import com.fiap.easyconsult.core.domain.model.Professional;
 import com.fiap.easyconsult.core.inputport.ConsultQueryUseCase;
+import com.fiap.easyconsult.infra.entrypoint.dto.enums.StatusConsultation;
 import com.fiap.easyconsult.infra.entrypoint.mapper.ConsultationMapper;
 import com.fiap.easyconsult.infra.persistence.repository.ConsultationRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Service
@@ -32,50 +32,34 @@ public class FindByGatewayImpl implements ConsultQueryUseCase {
     }
 
     @Override
-    public Optional<Patient> findByPatientId(String patientId) {
-        //TODO: implementar busca de paciente por ID
-        // Se não existir, lançar uma exceção
-        // Se existir, retornar o paciente
+    public Optional<Consult> findByPatientEmail(String email) {
+        //TODO: implementar busca por email do paciente
+        // Se não encontrar, lançar uma exceção
+        // Se encontrar, retornar a consulta
         return Optional.empty();
     }
 
     @Override
-    public Optional<Professional> findByProfessionalId(String professionalId) {
-        //TODO: implementar busca de profissional por ID
-        // Se não existir, lançar uma exceção
-        // Se existir, retornar o profissional
+    public Optional<Consult> findByProfessionalEmail(String email) {
+        //TODO: implementar busca por email do profissional
+        // Se não encontrar, lançar uma exceção
+        // Se encontrar, retornar a consulta
         return Optional.empty();
     }
 
     @Override
-    public Optional<Consult> findAllByConsult(String consultId) {
-        //TODO: implementar busca de todas as consultas
-        // Se não existir, lançar uma exceção
-        // Se existir, retornar a lista de consultas
+    public Optional<Consult> findByStatus(StatusConsultation status) {
+        //TODO: implementar busca por status da consulta
+        // Se não encontrar, lançar uma exceção
+        // Se encontrar, retornar a consulta
         return Optional.empty();
     }
 
     @Override
-    public Optional<Patient> findAllByPatient(String patientId) {
-        //TODO: implementar busca de todos os pacientes
-        // Se não existir, lançar uma exceção
-        // Se existir, retornar a lista de pacientes
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<Professional> findAllByProfessional(String professionalId) {
-        //TODO: implementar busca de todos os profissionais
-        // Se não existir, lançar uma exceção
-        // Se existir, retornar a lista de profissionais
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<Consult> findAll(String consultationId) {
-        //TODO: implementar busca de todas as consultas
-        // Se não existir, lançar uma exceção
-        // Se existir, retornar a lista de consultas
+    public Optional<Consult> findByConsultationDateBetween(LocalDate start, LocalDate end) {
+        //TODO: implementar busca por data da consulta
+        // Se não encontrar, lançar uma exceção
+        // Se encontrar, retornar a consulta
         return Optional.empty();
     }
 }
