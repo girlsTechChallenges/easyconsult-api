@@ -4,6 +4,7 @@ import com.fiap.easyconsult.core.domain.model.Consult;
 import com.fiap.easyconsult.core.outputport.SaveGateway;
 import com.fiap.easyconsult.infra.entrypoint.mapper.ConsultationMapper;
 import com.fiap.easyconsult.infra.persistence.repository.ConsultationRepository;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,6 +19,7 @@ public class SaveGatewayImpl implements SaveGateway {
     }
 
     @Override
+    @CachePut(value = "consults", key = "#result.id")
     public Consult save(Consult consult) {
         //TODO: validar se o paciente e o profissional existem antes de salvar a consulta
         // Se não existirem, lançar uma exceção

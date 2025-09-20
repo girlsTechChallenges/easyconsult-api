@@ -1,6 +1,9 @@
 package com.fiap.easyconsult.core.domain.model;
 
-public class Patient {
+import java.io.Serializable;
+
+public class Patient implements Serializable {
+
     private Long id;
     private String email;
     private String name;

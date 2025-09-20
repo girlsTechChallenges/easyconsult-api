@@ -43,12 +43,10 @@ input ConsultationRequestDto {
     reason: String!
 }
 
-input ConsultationFilterInput {
+input ConsultationFilterRequestDto {
     patientEmail: String
     professionalEmail: String
     status: ConsultationStatus
-    startDate: String
-    endDate: String
 }
 
 
@@ -57,9 +55,8 @@ input ConsultationFilterInput {
 # ========================
 
 type Query {
-    getConsultationById(id: ID!): ConsultationResponseDto
     getAllConsultations: [ConsultationResponseDto!]!
-    getFilteredConsultations(filter: ConsultationFilterInput): [ConsultationResponseDto!]!
+    getFilteredConsultations(filter: ConsultationFilterRequestDto): [ConsultationResponseDto!]!
 }
 
 # ========================

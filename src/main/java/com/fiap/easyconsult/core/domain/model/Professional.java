@@ -1,6 +1,8 @@
 package com.fiap.easyconsult.core.domain.model;
 
-public class Professional {
+import java.io.Serializable;
+
+public class Professional implements Serializable {
     private Long id;
     private String email;
     private String name;

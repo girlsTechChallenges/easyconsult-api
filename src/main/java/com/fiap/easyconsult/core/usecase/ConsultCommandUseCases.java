@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 @Component
-public class CreateConsultUseCases implements ConsultCommandUseCase {
+public class ConsultCommandUseCases implements ConsultCommandUseCase {
 
     private final SaveGateway gateway;
 
-    public CreateConsultUseCases(SaveGateway gateway) {
+    public ConsultCommandUseCases(SaveGateway gateway) {
         this.gateway = gateway;
     }
 

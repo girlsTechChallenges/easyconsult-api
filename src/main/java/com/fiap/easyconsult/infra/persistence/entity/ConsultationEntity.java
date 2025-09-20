@@ -22,6 +22,7 @@ public class ConsultationEntity {
     @JoinColumn(name = "professional" , referencedColumnName = "id" )
     private ProfessionalEntity professional;
 
+    @Column(name = "date_time")
     LocalDateTime dateTime;
     private String reason;
     private String status;
