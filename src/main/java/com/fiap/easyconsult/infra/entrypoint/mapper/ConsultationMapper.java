@@ -8,11 +8,13 @@ import com.fiap.easyconsult.infra.entrypoint.dto.data.PatientDataDto;
 import com.fiap.easyconsult.infra.entrypoint.dto.request.ConsultationFilterRequestDto;
 import com.fiap.easyconsult.infra.entrypoint.dto.request.ConsultationRequestDto;
 import com.fiap.easyconsult.infra.entrypoint.dto.response.ConsultationResponseDto;
+import com.fiap.easyconsult.infra.exception.MapperException;
 import com.fiap.easyconsult.infra.persistence.entity.ConsultationEntity;
 import com.fiap.easyconsult.infra.persistence.entity.PatientEntity;
 import com.fiap.easyconsult.infra.persistence.entity.ProfessionalEntity;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static com.fiap.easyconsult.infra.entrypoint.dto.enums.StatusConsultation.SCHEDULED;
@@ -32,7 +34,7 @@ public class ConsultationMapper {
                 patientData,
                 professionalData,
                 request.localTime(),
-                request.date());
+                verifyDate(request.date()));
     }
 
     public ConsultationEntity toConsultationEntity(Consult consult){
@@ -101,5 +103,12 @@ public class ConsultationMapper {
                 valueOf(consult.getStatus()),
                 consult.getReason()
         );
+    }
+
+    private LocalDate verifyDate(LocalDate date) {
+        if (date.isBefore(LocalDate.now())) {
+            throw new MapperException("Query data cannot be older than current data", "ERROR_INCONSISTENT_DATE");
+        }
+        return date;
     }
 }

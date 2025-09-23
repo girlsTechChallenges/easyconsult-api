@@ -4,6 +4,7 @@ import com.fiap.easyconsult.core.domain.model.Consult;
 import com.fiap.easyconsult.core.outputport.SaveGateway;
 import com.fiap.easyconsult.infra.entrypoint.mapper.ConsultationMapper;
 import com.fiap.easyconsult.infra.exception.GatewayException;
+import com.fiap.easyconsult.infra.exception.GraphQLException;
 import com.fiap.easyconsult.infra.persistence.entity.ConsultationEntity;
 import com.fiap.easyconsult.infra.persistence.repository.ConsultationRepository;
 import lombok.extern.log4j.Log4j2;
