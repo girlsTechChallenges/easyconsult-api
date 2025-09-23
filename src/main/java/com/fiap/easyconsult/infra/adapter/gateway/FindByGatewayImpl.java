@@ -12,8 +12,8 @@ import jakarta.persistence.TypedQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,56 +34,66 @@ public class FindByGatewayImpl implements FindByGateway {
     }
 
     @Override
-//    @Transactional(readOnly = true)
-//    @Cacheable(value = "consults-filtered", key = "#filter.toString()")
+    @Cacheable(value = "consultsByFilter", key = "#filter.hashCode()")
     public List<Consult> findWithFilters(ConsultationFilter filter) {
-        log.info("Finding consultations with filters: {}", filter);
+        log.info("Searching consultations with filters: {}", filter);
 
-        StringBuilder jpql = new StringBuilder("SELECT c FROM ConsultationEntity c WHERE 1=1");
-        Map<String, Object> params = new HashMap<>();
+        try {
+            String consultBase = "SELECT c FROM ConsultationEntity c WHERE 1=1";
+            Map<String, Object> parameter = new HashMap<>();
+            List<String> condition = new ArrayList<>();
 
-        //TODO: preciso corrigir os filtros
-//
-//        if (filter.getPatientEmail() != null) {
-//            jpql.append(" AND c.patient.email = :patientEmail");
-//            params.put("patientEmail", filter.getPatientEmail());
-//        }
-//
-//        if (filter.getProfessionalEmail() != null) {
-//            jpql.append(" AND c.professional.email = :profEmail");
-//            params.put("profEmail", filter.getProfessionalEmail());
-//        }
-//
-//        if (filter.getStatus() != null) {
-//            jpql.append(" AND c.status = :status");
-//            params.put("status", filter.getStatus().toString());
-//        }
+            addCondition(filter.getPatientEmail(), "c.patient.email", "patientEmail", condition, parameter);
+            addCondition(filter.getProfessionalEmail(), "c.professional.email", "profEmail", condition, parameter);
+            addCondition(filter.getStatus(), "c.status", "status", condition, parameter, true);
+            addCondition(filter.getDate(), "c.localDate", "localDate", condition, parameter);
 
-        TypedQuery<ConsultationEntity> query = entityManager.createQuery(jpql.toString(), ConsultationEntity.class);
-        params.forEach(query::setParameter);
+            String jpql = consultBase + String.join(" AND ", condition);
+            TypedQuery<ConsultationEntity> query = entityManager.createQuery(jpql, ConsultationEntity.class);
+            parameter.forEach(query::setParameter);
 
-        List<ConsultationEntity> entities = query.getResultList();
-        log.info("Consultations found: {}", entities.size());
-        entities.forEach(e -> log.info("Consulta ID: {}, Profissional: {}", e.getId(), e.getProfessional().getEmail()));
+            List<Consult> result = query.getResultList().stream()
+                    .map(mapper::toConsultation)
+                    .toList();
 
-        log.info("JPQL: {}", jpql);
-        params.forEach((k, v) -> log.info("Param {} = {}", k, v));
+            log.info("Found {} consultations with filters", result.size());
+            return result;
 
-        return query.getResultList().stream()
-                .map(mapper::toConsultation)
-                .toList();
+        } catch (Exception e) {
+            log.error("Error while filtering consultations", e);
+            throw e;
+        }
     }
 
     @Override
-    @Transactional(readOnly = true)
-    @Cacheable(value = "consults-all")
+    @Cacheable("allConsults")
     public List<Consult> findAll() {
         log.info("Searching all consultations with details");
 
-        var entities = repository.findAllWithDetails();
+        try {
+            var entities = repository.findAllWithDetails();
+            log.info("Found {} consultations", entities.size());
 
-        return entities.stream()
-                .map(mapper::toConsultation)
-                .toList();
+            return entities.stream()
+                    .map(mapper::toConsultation)
+                    .toList();
+
+        } catch (Exception e) {
+            log.error("Error while fetching all consultations", e);
+            throw e;
+        }
+    }
+
+    private void addCondition(Object valor, String campo, String nameParameter,
+                              List<String> condition, Map<String, Object> parameter) {
+        addCondition(valor, campo, nameParameter, condition, parameter, false);
+    }
+
+    private void addCondition(Object valor, String campo, String nameParameter,
+                              List<String> condition, Map<String, Object> parameter, boolean converterParaString) {
+        if (valor != null) {
+            condition.add(" AND " + campo + " = :" + nameParameter);
+            parameter.put(nameParameter, converterParaString ? valor.toString() : valor);
+        }
     }
 }

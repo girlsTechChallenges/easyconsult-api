@@ -3,7 +3,8 @@ package com.fiap.easyconsult.infra.persistence.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Data
 @Entity
@@ -22,17 +23,20 @@ public class ConsultationEntity {
     @JoinColumn(name = "professional" , referencedColumnName = "id" )
     private ProfessionalEntity professional;
 
-    @Column(name = "date_time")
-    LocalDateTime dateTime;
+    @Column(name = "local_time")
+    private LocalTime localTime;
+    @Column(name = "local_date")
+    private LocalDate localDate;
     private String reason;
     private String status;
 
-    public ConsultationEntity(Long id, PatientEntity patient, ProfessionalEntity professional, LocalDateTime dateTime,
-                              String reason, String status) {
+    public ConsultationEntity(Long id, PatientEntity patient, ProfessionalEntity professional, LocalTime localTime,
+                              LocalDate localDate, String reason, String status) {
         this.id = id;
         this.patient = patient;
         this.professional = professional;
-        this.dateTime = dateTime;
+        this.localDate = localDate;
+        this.localTime = localTime;
         this.reason = reason;
         this.status = status;
     }

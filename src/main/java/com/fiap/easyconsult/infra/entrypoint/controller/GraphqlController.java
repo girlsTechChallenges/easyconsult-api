@@ -45,6 +45,4 @@ public class GraphqlController {
         var consultationResponse = consultCommandUseCase.createConsultation(consultationDto);
         return mapper.toConsultationResponse(consultationResponse);
     }
-
-
 }

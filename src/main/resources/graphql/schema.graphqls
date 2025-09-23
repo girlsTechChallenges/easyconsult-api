@@ -1,6 +1,8 @@
 # ========================
 # Types
 # ========================
+scalar LocalTime
+scalar Date
 
 enum ConsultationStatus {
     SCHEDULED
@@ -17,7 +19,8 @@ type ConsultationResponseDto {
     id: ID!
     patient: Patient
     nameProfessional: String
-    consultationDate: String
+    localTime: LocalTime
+    date: Date
     statusConsultation: ConsultationStatus
     reason: String
 }
@@ -39,13 +42,16 @@ input ProfessionalDataDto {
 input ConsultationRequestDto {
     patient: PatientDataDto!
     professional: ProfessionalDataDto!
-    dateTime: String!
+    localTime: String!
+    date: Date!
     reason: String!
 }
 
 input ConsultationFilterRequestDto {
     patientEmail: String
     professionalEmail: String
+    localTime: LocalTime
+    date: Date
     status: ConsultationStatus
 }
 
@@ -55,15 +61,13 @@ input ConsultationFilterRequestDto {
 # ========================
 
 type Query {
-    getAllConsultations: [ConsultationResponseDto!]!
-    getFilteredConsultations(filter: ConsultationFilterRequestDto): [ConsultationResponseDto!]!
+    getFilteredConsultations(filter: ConsultationFilterRequestDto): [ConsultationResponseDto]
+    getAllConsultations: [ConsultationResponseDto]
 }
 
 # ========================
 # Mutations
 # ========================
 type Mutation {
-    createFullConsultation(input: ConsultationRequestDto!): ConsultationResponseDto!
-    updateConsultationStatus(id: ID!, status: ConsultationStatus!): ConsultationResponseDto!
-    cancelConsultation(id: ID!): ConsultationResponseDto!
+    createFullConsultation(input: ConsultationRequestDto): ConsultationResponseDto
 }

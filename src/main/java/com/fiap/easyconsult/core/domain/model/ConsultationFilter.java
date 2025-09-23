@@ -1,9 +1,10 @@
 package com.fiap.easyconsult.core.domain.model;
 
-import com.fiap.easyconsult.core.domain.valueobject.DateAndTime;
 import com.fiap.easyconsult.infra.entrypoint.dto.enums.StatusConsultation;
 
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 public class ConsultationFilter implements Serializable {
 
@@ -11,15 +12,16 @@ public class ConsultationFilter implements Serializable {
     private String patientEmail;
     private String professionalEmail;
     private StatusConsultation status;
-    private DateAndTime startDate;
-    private DateAndTime endDate;
+    private LocalTime localTime;
+    private LocalDate date;
 
-    public ConsultationFilter(Long id, String patientEmail, String professionalEmail, StatusConsultation status, DateAndTime startDate, DateAndTime endDate) {
+    public ConsultationFilter(Long id, String patientEmail, String professionalEmail, StatusConsultation status,
+                              LocalTime localTime, LocalDate date) {
         this.patientEmail = patientEmail;
         this.professionalEmail = professionalEmail;
         this.status = status;
-        this.startDate = startDate;
-        this.endDate = endDate;
+        this.localTime = localTime;
+        this.date = date;
     }
 
     public Long getId() {
@@ -42,20 +44,20 @@ public class ConsultationFilter implements Serializable {
         this.professionalEmail = professionalEmail;
     }
 
-    public DateAndTime getStartDate() {
-        return startDate;
+    public LocalTime getLocalTime() {
+        return localTime;
     }
 
-    public void setStartDate(DateAndTime startDate) {
-        this.startDate = startDate;
+    public void setLocalTime(LocalTime localTime) {
+        this.localTime = localTime;
     }
 
-    public DateAndTime getEndDate() {
-        return endDate;
+    public LocalDate getDate() {
+        return date;
     }
 
-    public void setEndDate(DateAndTime endDate) {
-        this.endDate = endDate;
+    public void setDate(LocalDate date) {
+        this.date = date;
     }
 
     public StatusConsultation getStatus() {
@@ -68,12 +70,13 @@ public class ConsultationFilter implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("filter[%s-%s-%s-%s-%s]",
+        return String.format("filter[%s-%s-%s-%s-%s-%s]",
                 patientEmail,
                 professionalEmail,
                 status != null ? status.name() : "null",
-                startDate,
-                endDate
+                localTime != null ? localTime.toString() : "null",
+                date != null ? date.toString() : "null",
+                id != null ? id.toString() : "null"
         );
     }
 

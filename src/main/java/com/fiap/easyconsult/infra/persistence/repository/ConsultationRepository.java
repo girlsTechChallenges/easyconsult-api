@@ -1,6 +1,7 @@
 package com.fiap.easyconsult.infra.persistence.repository;
 
 import com.fiap.easyconsult.infra.persistence.entity.ConsultationEntity;
+import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,5 +15,9 @@ public interface ConsultationRepository extends JpaRepository<ConsultationEntity
     @EntityGraph(attributePaths = {"patient", "professional"})
     @Query("SELECT c FROM ConsultationEntity c")
     List<ConsultationEntity> findAllWithDetails();
+
+
+    @Query("SELECT c FROM ConsultationEntity c WHERE c.patient.email = :email")
+    List<ConsultationEntity> findAllByPatientEmail(@Param("email") String email);
 
 }

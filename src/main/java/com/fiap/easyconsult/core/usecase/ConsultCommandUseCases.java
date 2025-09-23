@@ -19,18 +19,11 @@ public class ConsultCommandUseCases implements ConsultCommandUseCase {
 
     @Override
     public Consult createConsultation(Consult consult) {
-        //TODO: validar se objeto está preenchido corretamente
         return gateway.save(consult);
     }
 
     @Override
     public Optional<UpdateConsult> updateConsultation(UpdateConsult updateConsult) {
-        //TODO: implementar updateConsultation
-        // validar se objeto está preenchido corretamente
-
-        //TODO: primeiro verificar se há no banco através da consulta por id
-        //TODO: se existir, atualizar
-
         return Optional.empty();
     }
 }

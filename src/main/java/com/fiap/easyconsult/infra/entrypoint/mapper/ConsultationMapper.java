@@ -4,9 +4,7 @@ import com.fiap.easyconsult.core.domain.model.Consult;
 import com.fiap.easyconsult.core.domain.model.ConsultationFilter;
 import com.fiap.easyconsult.core.domain.model.Patient;
 import com.fiap.easyconsult.core.domain.model.Professional;
-import com.fiap.easyconsult.core.domain.valueobject.DateAndTime;
 import com.fiap.easyconsult.infra.entrypoint.dto.data.PatientDataDto;
-import com.fiap.easyconsult.infra.entrypoint.dto.enums.StatusConsultation;
 import com.fiap.easyconsult.infra.entrypoint.dto.request.ConsultationFilterRequestDto;
 import com.fiap.easyconsult.infra.entrypoint.dto.request.ConsultationRequestDto;
 import com.fiap.easyconsult.infra.entrypoint.dto.response.ConsultationResponseDto;
@@ -17,12 +15,15 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+import static com.fiap.easyconsult.infra.entrypoint.dto.enums.StatusConsultation.SCHEDULED;
+import static com.fiap.easyconsult.infra.entrypoint.dto.enums.StatusConsultation.valueOf;
+
 @Component
 public class ConsultationMapper {
 
     public Consult toConsultation(ConsultationRequestDto request) {
-        var patientData = new Patient(null, request.patient().name(), request.patient().email());
-        var professionalData = new Professional(null, request.professional().name(), request.professional().email());
+        var patientData = new Patient(null, request.patient().email(), request.patient().name());
+        var professionalData = new Professional(null, request.professional().email(), request.professional().name());
 
         return new Consult(
                 null,
@@ -30,35 +31,46 @@ public class ConsultationMapper {
                 null,
                 patientData,
                 professionalData,
-                new DateAndTime(request.dateTime()));
+                request.localTime(),
+                request.date());
     }
 
     public ConsultationEntity toConsultationEntity(Consult consult){
         var patientEntity = new PatientEntity(null, consult.getPatient().getName(), consult.getPatient().getEmail());
-        var professionalEntity = new ProfessionalEntity(null, consult.getProfessional().getName(), consult.getProfessional().getEmail());
+        var professionalEntity = new ProfessionalEntity(
+                null,
+                consult.getProfessional().getName(),
+                consult.getProfessional().getEmail());
 
         var entity = new ConsultationEntity();
         entity.setReason(consult.getReason());
         entity.setPatient(patientEntity);
         entity.setProfessional(professionalEntity);
-        entity.setDateTime(consult.getDateAndTime().getValue());
-        entity.setStatus(consult.getStatus());
+        entity.setLocalTime(consult.getLocalTime());
+        entity.setLocalDate(consult.getDate());
+        entity.setStatus(SCHEDULED.name());
         return entity;
 
     }
 
     public Consult toConsultation(ConsultationEntity entity){
         var patient = new Patient(
-                entity.getId(),
-                entity.getPatient().getName(),
-                entity.getPatient().getEmail());
+                entity.getPatient().getId(),
+                entity.getPatient().getEmail(),
+                entity.getPatient().getName());
         var professional = new Professional(
                 entity.getProfessional().getId(),
-                entity.getProfessional().getName(),
-                entity.getProfessional().getEmail());
-        var dateAndTime = new DateAndTime(entity.getDateTime());
+                entity.getProfessional().getEmail(),
+                entity.getProfessional().getName());
 
-        return new Consult(entity.getId(), entity.getReason(), entity.getStatus(), patient, professional, dateAndTime);
+        return new Consult(
+                entity.getId(),
+                entity.getReason(),
+                entity.getStatus(),
+                patient,
+                professional,
+                entity.getLocalTime(),
+                entity.getLocalDate());
     }
 
     public ConsultationFilter toConsultationFilter(ConsultationFilterRequestDto request) {
@@ -66,7 +78,9 @@ public class ConsultationMapper {
                 null,
                 request.patientEmail(),
                 request.professionalEmail(),
-                request.status(), null, null
+                request.status(),
+                request.localTime(),
+                request.date()
         );
     }
 
@@ -82,8 +96,9 @@ public class ConsultationMapper {
                         consult.getPatient().getName(),
                         consult.getPatient().getEmail()),
                 consult.getProfessional().getName(),
-                consult.getDateAndTime().getValue(),
-                StatusConsultation.SCHEDULED,     //TODO: ajustar status de acordo com a lógica de negócio
+                consult.getLocalTime(),
+                consult.getDate(),
+                valueOf(consult.getStatus()),
                 consult.getReason()
         );
     }
