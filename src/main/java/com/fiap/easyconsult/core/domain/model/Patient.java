@@ -1,6 +1,13 @@
 package com.fiap.easyconsult.core.domain.model;
 
-public class Patient {
+import java.io.Serial;
+import java.io.Serializable;
+
+public class Patient implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private Long id;
     private String email;
     private String name;
@@ -33,5 +40,14 @@ public class Patient {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return "Patient{" +
+                "id=" + id +
+                ", email='" + email + '\'' +
+                ", name='" + name + '\'' +
+                '}';
     }
 }

@@ -9,28 +9,21 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 @Component
-public class CreateConsultUseCases implements ConsultCommandUseCase {
+public class ConsultCommandUseCases implements ConsultCommandUseCase {
 
     private final SaveGateway gateway;
 
-    public CreateConsultUseCases(SaveGateway gateway) {
+    public ConsultCommandUseCases(SaveGateway gateway) {
         this.gateway = gateway;
     }
 
     @Override
     public Consult createConsultation(Consult consult) {
-        //TODO: validar se objeto está preenchido corretamente
         return gateway.save(consult);
     }
 
     @Override
     public Optional<UpdateConsult> updateConsultation(UpdateConsult updateConsult) {
-        //TODO: implementar updateConsultation
-        // validar se objeto está preenchido corretamente
-
-        //TODO: primeiro verificar se há no banco através da consulta por id
-        //TODO: se existir, atualizar
-
         return Optional.empty();
     }
 }

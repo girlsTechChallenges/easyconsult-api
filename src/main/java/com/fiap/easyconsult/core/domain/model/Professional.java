@@ -1,6 +1,13 @@
 package com.fiap.easyconsult.core.domain.model;
 
-public class Professional {
+import java.io.Serial;
+import java.io.Serializable;
+
+public class Professional implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private Long id;
     private String email;
     private String name;
@@ -33,5 +40,14 @@ public class Professional {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return "Professional{" +
+                "id=" + id +
+                ", email='" + email + '\'' +
+                ", name='" + name + '\'' +
+                '}';
     }
 }

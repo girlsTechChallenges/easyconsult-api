@@ -1,66 +1,96 @@
 package com.fiap.easyconsult.infra.entrypoint.mapper;
 
 import com.fiap.easyconsult.core.domain.model.Consult;
+import com.fiap.easyconsult.core.domain.model.ConsultationFilter;
 import com.fiap.easyconsult.core.domain.model.Patient;
 import com.fiap.easyconsult.core.domain.model.Professional;
-import com.fiap.easyconsult.core.domain.valueobject.DateAndTime;
 import com.fiap.easyconsult.infra.entrypoint.dto.data.PatientDataDto;
-import com.fiap.easyconsult.infra.entrypoint.dto.enums.StatusConsultation;
+import com.fiap.easyconsult.infra.entrypoint.dto.request.ConsultationFilterRequestDto;
 import com.fiap.easyconsult.infra.entrypoint.dto.request.ConsultationRequestDto;
 import com.fiap.easyconsult.infra.entrypoint.dto.response.ConsultationResponseDto;
+import com.fiap.easyconsult.infra.exception.MapperException;
 import com.fiap.easyconsult.infra.persistence.entity.ConsultationEntity;
 import com.fiap.easyconsult.infra.persistence.entity.PatientEntity;
 import com.fiap.easyconsult.infra.persistence.entity.ProfessionalEntity;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.util.List;
+
+import static com.fiap.easyconsult.infra.entrypoint.dto.enums.StatusConsultation.SCHEDULED;
+import static com.fiap.easyconsult.infra.entrypoint.dto.enums.StatusConsultation.valueOf;
+
 @Component
 public class ConsultationMapper {
 
-    // método para converter de ConsultationRequestDto para Consultation - controller
     public Consult toConsultation(ConsultationRequestDto request) {
-        var patientData = new Patient(null, request.patient().name(), request.patient().email());
-        var professionalData = new Professional(null, request.professional().name(), request.professional().email());
+        var patientData = new Patient(null, request.patient().email(), request.patient().name());
+        var professionalData = new Professional(null, request.professional().email(), request.professional().name());
 
         return new Consult(
                 null,
                 request.reason(),
+                null,
                 patientData,
                 professionalData,
-                new DateAndTime(request.dateTime()));
+                request.localTime(),
+                verifyDate(request.date()));
     }
 
-    // método para converter de Consultation para ConsultationEntity - gateway
     public ConsultationEntity toConsultationEntity(Consult consult){
         var patientEntity = new PatientEntity(null, consult.getPatient().getName(), consult.getPatient().getEmail());
-        var professionalEntity = new ProfessionalEntity(null, consult.getProfessional().getName(), consult.getProfessional().getEmail());
+        var professionalEntity = new ProfessionalEntity(
+                null,
+                consult.getProfessional().getName(),
+                consult.getProfessional().getEmail());
 
         var entity = new ConsultationEntity();
         entity.setReason(consult.getReason());
         entity.setPatient(patientEntity);
         entity.setProfessional(professionalEntity);
-        entity.setDateTime(consult.getDateAndTime().getValue());
-
+        entity.setLocalTime(consult.getLocalTime());
+        entity.setLocalDate(consult.getDate());
+        entity.setStatus(SCHEDULED.name());
         return entity;
 
     }
 
-    // método para converter de ConsultationEntity para Consultation - gateway
     public Consult toConsultation(ConsultationEntity entity){
         var patient = new Patient(
-                entity.getId(),
-                entity.getPatient().getName(),
-                entity.getPatient().getEmail());
+                entity.getPatient().getId(),
+                entity.getPatient().getEmail(),
+                entity.getPatient().getName());
         var professional = new Professional(
                 entity.getProfessional().getId(),
-                entity.getProfessional().getName(),
-                entity.getProfessional().getEmail());
-        var dateAndTime = new DateAndTime(entity.getDateTime());
+                entity.getProfessional().getEmail(),
+                entity.getProfessional().getName());
 
-        return new Consult(entity.getId(), entity.getReason(), patient, professional, dateAndTime);
+        return new Consult(
+                entity.getId(),
+                entity.getReason(),
+                entity.getStatus(),
+                patient,
+                professional,
+                entity.getLocalTime(),
+                entity.getLocalDate());
     }
 
-    // método para converter de Consultation para ConsultationResponseDto - controller
-    //TODO: ajustar status
+    public ConsultationFilter toConsultationFilter(ConsultationFilterRequestDto request) {
+        return new ConsultationFilter(
+                null,
+                request.patientEmail(),
+                request.professionalEmail(),
+                request.status(),
+                request.localTime(),
+                request.date()
+        );
+    }
+
+    public List<ConsultationResponseDto> toConsultationResponse(List<Consult> consults) {
+        return consults.stream().map(this::toConsultationResponse).toList();
+    }
+
+
     public ConsultationResponseDto toConsultationResponse(Consult consult) {
         return new ConsultationResponseDto(
                 consult.getId(),
@@ -68,9 +98,17 @@ public class ConsultationMapper {
                         consult.getPatient().getName(),
                         consult.getPatient().getEmail()),
                 consult.getProfessional().getName(),
-                consult.getDateAndTime().getValue(),
-                StatusConsultation.SCHEDULED,
+                consult.getLocalTime(),
+                consult.getDate(),
+                valueOf(consult.getStatus()),
                 consult.getReason()
         );
+    }
+
+    private LocalDate verifyDate(LocalDate date) {
+        if (date.isBefore(LocalDate.now())) {
+            throw new MapperException("Query data cannot be older than current data", "ERROR_INCONSISTENT_DATE");
+        }
+        return date;
     }
 }
