@@ -1,4 +1,9 @@
 package com.fiap.easyconsult.infra.entrypoint.dto.data;
 
-public record ProfessionalDataDto(String name, String email) {
+import jakarta.validation.constraints.Email;
+
+public record ProfessionalDataDto(
+        String name,
+        @Email
+        String email) {
 }

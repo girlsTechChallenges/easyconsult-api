@@ -2,9 +2,14 @@ package com.fiap.easyconsult.core.domain.model;
 
 import com.fiap.easyconsult.infra.entrypoint.dto.enums.StatusConsultation;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDate;
 
-public class UpdateConsult {
+public class UpdateConsult implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private String professionalName;
     private LocalDate consultDate;
