@@ -4,6 +4,7 @@ import com.fiap.easyconsult.core.inputport.ConsultCommandUseCase;
 import com.fiap.easyconsult.core.inputport.ConsultQueryUseCase;
 import com.fiap.easyconsult.infra.entrypoint.dto.request.ConsultationFilterRequestDto;
 import com.fiap.easyconsult.infra.entrypoint.dto.request.ConsultationRequestDto;
+import com.fiap.easyconsult.infra.entrypoint.dto.request.ConsultationUpdateRequestDto;
 import com.fiap.easyconsult.infra.entrypoint.dto.response.ConsultationResponseDto;
 import com.fiap.easyconsult.infra.entrypoint.mapper.ConsultationMapper;
 import jakarta.validation.Valid;
@@ -51,5 +52,20 @@ public class GraphqlController {
         var consultationDto = mapper.toConsultation(input);
         var consultationResponse = consultCommandUseCase.createConsultation(consultationDto);
         return mapper.toConsultationResponse(consultationResponse);
+    }
+
+    @MutationMapping
+    @PreAuthorize("hasAnyAuthority('SCOPE_medico','SCOPE_enfermeiro')")
+    public ConsultationResponseDto updateConsultation(@Argument("input") @Valid ConsultationUpdateRequestDto input) {
+        var updateConsultDto = mapper.toUpdateConsult(input);
+        var consultationResponse = consultCommandUseCase.updateConsultation(updateConsultDto);
+        return mapper.toConsultationResponse(consultationResponse);
+    }
+
+    @MutationMapping
+    @PreAuthorize("hasAnyAuthority('SCOPE_medico','SCOPE_enfermeiro')")
+    public Boolean deleteConsultation(@Argument("id") Long id) {
+        consultCommandUseCase.deleteConsultation(id);
+        return true;
     }
 }

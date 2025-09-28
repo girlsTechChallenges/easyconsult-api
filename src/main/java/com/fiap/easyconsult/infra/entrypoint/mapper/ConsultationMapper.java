@@ -4,10 +4,13 @@ import com.fiap.easyconsult.core.domain.model.Consult;
 import com.fiap.easyconsult.core.domain.model.ConsultationFilter;
 import com.fiap.easyconsult.core.domain.model.Patient;
 import com.fiap.easyconsult.core.domain.model.Professional;
+import com.fiap.easyconsult.core.domain.model.UpdateConsult;
 import com.fiap.easyconsult.core.domain.valueobject.ConsultDateTime;
+import com.fiap.easyconsult.core.domain.valueobject.ConsultStatus;
 import com.fiap.easyconsult.infra.entrypoint.dto.data.PatientDataDto;
 import com.fiap.easyconsult.infra.entrypoint.dto.request.ConsultationFilterRequestDto;
 import com.fiap.easyconsult.infra.entrypoint.dto.request.ConsultationRequestDto;
+import com.fiap.easyconsult.infra.entrypoint.dto.request.ConsultationUpdateRequestDto;
 import com.fiap.easyconsult.infra.entrypoint.dto.response.ConsultationResponseDto;
 import com.fiap.easyconsult.infra.persistence.entity.ConsultationEntity;
 import com.fiap.easyconsult.infra.persistence.entity.PatientEntity;
@@ -105,5 +108,25 @@ public class ConsultationMapper {
                 valueOf(consult.getStatus().name()),
                 consult.getReason()
         );
+    }
+
+    public UpdateConsult toUpdateConsult(ConsultationUpdateRequestDto request) {
+        var builder = UpdateConsult.builder()
+                .id(request.id());
+
+        if (request.reason() != null) {
+            builder.reason(request.reason());
+        }
+        if (request.date() != null) {
+            builder.date(request.date());
+        }
+        if (request.localTime() != null) {
+            builder.time(request.localTime());
+        }
+        if (request.status() != null) {
+            builder.status(ConsultStatus.valueOf(request.status().name()));
+        }
+
+        return builder.build();
     }
 }

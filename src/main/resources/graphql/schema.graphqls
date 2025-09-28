@@ -55,6 +55,15 @@ input ConsultationFilterRequestDto {
     status: ConsultationStatus
 }
 
+input ConsultationUpdateRequestDto {
+    id: ID!
+    professional: ProfessionalDataDto
+    reason: String
+    date: Date
+    localTime: LocalTime
+    status: ConsultationStatus
+}
+
 
 # ========================
 # Queries
@@ -70,4 +79,6 @@ type Query {
 # ========================
 type Mutation {
     createFullConsultation(input: ConsultationRequestDto): ConsultationResponseDto
+    updateConsultation(input: ConsultationUpdateRequestDto): ConsultationResponseDto
+    deleteConsultation(id: ID!): Boolean
 }
