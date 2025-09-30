@@ -77,6 +77,7 @@ public class ConsultationMapper {
                 .patient(patient)
                 .professional(professional)
                 .reason(entity.getReason())
+                .status(ConsultStatus.valueOf(entity.getStatus()))
                 .build();
     }
 

@@ -5,6 +5,7 @@ import graphql.GraphQLError;
 import graphql.schema.DataFetchingEnvironment;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.graphql.execution.DataFetcherExceptionResolverAdapter;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
@@ -42,6 +43,17 @@ public class GraphQLExceptionHandler extends DataFetcherExceptionResolverAdapter
 
         if (rootCause instanceof IllegalArgumentException iae) {
             return buildBusinessError(iae.getMessage(), "INVALID_ARGUMENT", path, timestamp, traceId, ErrorCode.INVALID_ARGUMENT);
+        }
+
+        if (rootCause instanceof AuthorizationDeniedException ade) {
+            return buildBusinessError(
+                    "Acesso negado: você não tem permissão para executar esta operação.",
+                    "ACCESS_DENIED",
+                    path,
+                    timestamp,
+                    traceId,
+                    ErrorCode.FORBIDDEN
+            );
         }
 
         return buildInternalError(path, timestamp, traceId);

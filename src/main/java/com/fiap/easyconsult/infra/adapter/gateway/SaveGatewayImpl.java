@@ -41,8 +41,12 @@ public class SaveGatewayImpl implements SaveGateway {
         }
 
         List<ConsultationEntity> existingConsults = repository.findAllByPatientEmail(consult.getPatient().getEmail());
-        if (!existingConsults.isEmpty()) {
-            throw new GatewayException("Scheduling with email " + consult.getPatient().getEmail() + " already exists.", "CONSULT_VALIDATION_ERROR");
+
+        var dateConflicts = existingConsults.stream()
+                .anyMatch(c -> c.getLocalDate().isEqual(consult.getDate()) && c.getLocalTime().equals(consult.getTime()));
+
+        if (dateConflicts) {
+            throw new GatewayException("It is not permitted to schedule a new appointment for a date and time that already has an appointment registered.", "CONSULT_VALIDATION_ERROR");
         }
 
         try {

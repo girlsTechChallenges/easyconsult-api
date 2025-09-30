@@ -4,6 +4,7 @@ import com.fiap.easyconsult.core.domain.model.Consult;
 import com.fiap.easyconsult.core.domain.model.Patient;
 import com.fiap.easyconsult.core.domain.model.Professional;
 import com.fiap.easyconsult.core.domain.model.UpdateConsult;
+import com.fiap.easyconsult.core.domain.valueobject.ConsultStatus;
 import com.fiap.easyconsult.core.outputport.DeleteGateway;
 import com.fiap.easyconsult.core.outputport.SaveGateway;
 import com.fiap.easyconsult.core.outputport.UpdateGateway;
@@ -63,6 +64,7 @@ class ConsultCommandUseCasesTest {
                 .patient(patient)
                 .professional(professional)
                 .dateTime(LocalDate.now().plusDays(7), LocalTime.of(14, 30))
+                .status(ConsultStatus.SCHEDULED)
                 .build();
     }
 

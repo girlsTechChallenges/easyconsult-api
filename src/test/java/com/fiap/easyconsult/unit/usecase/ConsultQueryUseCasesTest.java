@@ -4,6 +4,7 @@ import com.fiap.easyconsult.core.domain.model.Consult;
 import com.fiap.easyconsult.core.domain.model.ConsultationFilter;
 import com.fiap.easyconsult.core.domain.model.Patient;
 import com.fiap.easyconsult.core.domain.model.Professional;
+import com.fiap.easyconsult.core.domain.valueobject.ConsultStatus;
 import com.fiap.easyconsult.core.outputport.FindByGateway;
 import com.fiap.easyconsult.core.usecase.ConsultQueryUseCases;
 import com.fiap.easyconsult.infra.exception.GatewayException;
@@ -58,6 +59,7 @@ class ConsultQueryUseCasesTest {
                 .patient(patient)
                 .professional(professional)
                 .dateTime(LocalDate.now().plusDays(7), LocalTime.of(14, 30))
+                .status(ConsultStatus.SCHEDULED)
                 .build();
 
         validConsultList = List.of(consult);

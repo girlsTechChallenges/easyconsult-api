@@ -47,7 +47,7 @@ public class GraphqlController {
     }
 
     @MutationMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyAuthority('SCOPE_enfermeiro')")
     public ConsultationResponseDto createFullConsultation(@Argument("input") @Valid ConsultationRequestDto input) {
         var consultationDto = mapper.toConsultation(input);
         var consultationResponse = consultCommandUseCase.createConsultation(consultationDto);
@@ -55,7 +55,7 @@ public class GraphqlController {
     }
 
     @MutationMapping
-    @PreAuthorize("hasAnyAuthority('SCOPE_medico','SCOPE_enfermeiro')")
+    @PreAuthorize("hasAnyAuthority('SCOPE_medico')")
     public ConsultationResponseDto updateConsultation(@Argument("input") @Valid ConsultationUpdateRequestDto input) {
         var updateConsultDto = mapper.toUpdateConsult(input);
         var consultationResponse = consultCommandUseCase.updateConsultation(updateConsultDto);
@@ -63,7 +63,7 @@ public class GraphqlController {
     }
 
     @MutationMapping
-    @PreAuthorize("hasAnyAuthority('SCOPE_medico','SCOPE_enfermeiro')")
+    @PreAuthorize("hasAnyAuthority('SCOPE_medico')")
     public Boolean deleteConsultation(@Argument("id") Long id) {
         consultCommandUseCase.deleteConsultation(id);
         return true;

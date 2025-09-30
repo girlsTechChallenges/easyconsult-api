@@ -10,8 +10,6 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import static com.fiap.easyconsult.core.domain.valueobject.ConsultStatus.*;
-
 public class Consult implements Serializable {
 
     @Serial
@@ -28,7 +26,7 @@ public class Consult implements Serializable {
         validateConsult(builder);
         this.id = builder.id;
         this.reason = builder.reason;
-        this.status = SCHEDULED;
+        this.status = builder.status;
         this.patient = builder.patient;
         this.professional = builder.professional;
         this.dateTime = builder.dateTime;
@@ -56,27 +54,27 @@ public class Consult implements Serializable {
         if (dateTime.isPast()) {
             throw new DomainException("Cannot cancel a past consult", "BUSINESS_RULE");
         }
-        this.status = CANCELLED;
+        this.status = ConsultStatus.CANCELLED;
     }
 
     public void complete() {
-        if (status != SCHEDULED) {
+        if (status != ConsultStatus.SCHEDULED) {
             throw new DomainException("Only scheduled consults can be completed", "BUSINESS_RULE");
         }
         if (!dateTime.isPast()) {
             throw new DomainException("Cannot complete a future consult", "BUSINESS_RULE");
         }
-        this.status = COMPLETED;
+        this.status = ConsultStatus.COMPLETED;
     }
 
     public void markAsNoShow() {
-        if (status != SCHEDULED) {
+        if (status != ConsultStatus.SCHEDULED) {
             throw new DomainException("Only scheduled consults can be marked as no-show", "BUSINESS_RULE");
         }
         if (!dateTime.isPast()) {
             throw new DomainException("Cannot mark as no-show a future consult", "BUSINESS_RULE");
         }
-        this.status = NO_SHOW;
+        this.status = ConsultStatus.NO_SHOW;
     }
 
     public ConsultId getId() {
@@ -117,6 +115,7 @@ public class Consult implements Serializable {
         private Patient patient;
         private Professional professional;
         private ConsultDateTime dateTime;
+        private ConsultStatus status;
 
         public Builder id(Long id) {
             this.id = ConsultId.of(id);
@@ -140,6 +139,11 @@ public class Consult implements Serializable {
 
         public Builder dateTime(LocalDate date, LocalTime time) {
             this.dateTime = ConsultDateTime.of(date, time);
+            return this;
+        }
+
+        public Builder status(ConsultStatus status) {
+            this.status = status;
             return this;
         }
 

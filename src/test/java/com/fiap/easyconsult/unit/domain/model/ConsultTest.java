@@ -23,6 +23,7 @@ class ConsultTest {
     private LocalDate futureDate;
     private LocalDate pastDate;
     private LocalTime consultTime;
+    private ConsultStatus status;
 
     @BeforeEach
     void setUp() {
@@ -41,6 +42,7 @@ class ConsultTest {
         futureDate = LocalDate.now().plusDays(7);
         pastDate = LocalDate.now().minusDays(1);
         consultTime = LocalTime.of(14, 30);
+        status = ConsultStatus.SCHEDULED;
     }
 
     @Nested
@@ -57,6 +59,7 @@ class ConsultTest {
                     .patient(patient)
                     .professional(professional)
                     .dateTime(futureDate, consultTime)
+                    .status(status)
                     .build();
 
             // Then
@@ -81,6 +84,7 @@ class ConsultTest {
                             .patient(patient)
                             .professional(professional)
                             .dateTime(futureDate, consultTime)
+                            .status(status)
                             .build()
             );
 
@@ -99,6 +103,7 @@ class ConsultTest {
                             .patient(patient)
                             .professional(professional)
                             .dateTime(futureDate, consultTime)
+                            .status(status)
                             .build()
             );
 
@@ -117,6 +122,7 @@ class ConsultTest {
                             .patient(null)
                             .professional(professional)
                             .dateTime(futureDate, consultTime)
+                            .status(status)
                             .build()
             );
 
@@ -135,6 +141,7 @@ class ConsultTest {
                             .patient(patient)
                             .professional(null)
                             .dateTime(futureDate, consultTime)
+                            .status(status)
                             .build()
             );
 
@@ -152,6 +159,7 @@ class ConsultTest {
                             .reason("Consulta de rotina")
                             .patient(patient)
                             .professional(professional)
+                            .status(status)
                             .build()
             );
 
@@ -174,6 +182,7 @@ class ConsultTest {
                     .patient(patient)
                     .professional(professional)
                     .dateTime(futureDate, consultTime)
+                    .status(status)
                     .build();
 
             // When
@@ -193,6 +202,7 @@ class ConsultTest {
                     .patient(patient)
                     .professional(professional)
                     .dateTime(pastDate, consultTime)
+                    .status(status)
                     .build();
 
             // When & Then
@@ -211,6 +221,7 @@ class ConsultTest {
                     .patient(patient)
                     .professional(professional)
                     .dateTime(pastDate, consultTime)
+                    .status(status)
                     .build();
 
             // When
@@ -230,6 +241,7 @@ class ConsultTest {
                     .patient(patient)
                     .professional(professional)
                     .dateTime(futureDate, consultTime)
+                    .status(status)
                     .build();
 
             // When & Then
@@ -248,7 +260,9 @@ class ConsultTest {
                     .patient(patient)
                     .professional(professional)
                     .dateTime(pastDate, consultTime)
+                    .status(status)
                     .build();
+
 
             // When
             consult.markAsNoShow();
@@ -267,6 +281,7 @@ class ConsultTest {
                     .patient(patient)
                     .professional(professional)
                     .dateTime(futureDate, consultTime)
+                    .status(status)
                     .build();
 
             // When & Then
@@ -290,6 +305,7 @@ class ConsultTest {
                     .patient(patient)
                     .professional(professional)
                     .dateTime(pastDate, consultTime)
+                    .status(status)
                     .build();
             
             consult.complete();
@@ -310,6 +326,7 @@ class ConsultTest {
                     .patient(patient)
                     .professional(professional)
                     .dateTime(futureDate, consultTime)
+                    .status(status)
                     .build();
             
             consult.cancel();
@@ -330,6 +347,7 @@ class ConsultTest {
                     .patient(patient)
                     .professional(professional)
                     .dateTime(futureDate, consultTime)
+                    .status(status)
                     .build();
             
             consult.cancel();

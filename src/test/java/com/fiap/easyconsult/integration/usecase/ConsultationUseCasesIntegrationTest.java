@@ -6,8 +6,10 @@ import com.fiap.easyconsult.core.domain.model.Patient;
 import com.fiap.easyconsult.core.domain.model.Professional;
 import com.fiap.easyconsult.core.domain.model.ConsultationFilter;
 import com.fiap.easyconsult.core.domain.model.UpdateConsult;
+import com.fiap.easyconsult.core.domain.valueobject.ConsultStatus;
 import com.fiap.easyconsult.core.inputport.ConsultCommandUseCase;
 import com.fiap.easyconsult.core.inputport.ConsultQueryUseCase;
+import com.fiap.easyconsult.infra.entrypoint.dto.enums.StatusConsultation;
 import com.fiap.easyconsult.integration.config.TestConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -52,6 +54,7 @@ class ConsultationUseCasesIntegrationTest {
     private Professional testProfessional;
     private LocalDate futureDate;
     private LocalTime consultTime;
+    private ConsultStatus status;
 
     @BeforeEach
     void setUp() {
@@ -67,6 +70,8 @@ class ConsultationUseCasesIntegrationTest {
 
         futureDate = LocalDate.now().plusDays(7);
         consultTime = LocalTime.of(14, 30);
+        status = ConsultStatus.SCHEDULED;
+
     }
 
     @Nested
@@ -82,6 +87,7 @@ class ConsultationUseCasesIntegrationTest {
                     .patient(testPatient)
                     .professional(testProfessional)
                     .dateTime(futureDate, consultTime)
+                    .status(status)
                     .build();
 
             Consult createdConsultation = consultCommandUseCase.createConsultation(consultation);
@@ -140,6 +146,7 @@ class ConsultationUseCasesIntegrationTest {
                     .patient(specificPatient)
                     .professional(testProfessional)
                     .dateTime(futureDate, consultTime)
+                    .status(status)
                     .build();
 
             consultCommandUseCase.createConsultation(consultation);
@@ -180,6 +187,7 @@ class ConsultationUseCasesIntegrationTest {
                     .patient(uniquePatient)
                     .professional(specificProfessional)
                     .dateTime(futureDate, consultTime)
+                    .status(status)
                     .build();
 
             consultCommandUseCase.createConsultation(consultation);
@@ -217,6 +225,7 @@ class ConsultationUseCasesIntegrationTest {
                             .build())
                     .professional(testProfessional)
                     .dateTime(futureDate, consultTime)
+                    .status(status)
                     .build();
 
             // When & Then: Criar consulta deve ser bem-sucedido

@@ -1,10 +1,7 @@
 package com.fiap.easyconsult.unit.controller;
 
-import com.fiap.easyconsult.core.domain.model.Consult;
-import com.fiap.easyconsult.core.domain.model.ConsultationFilter;
-import com.fiap.easyconsult.core.domain.model.Patient;
-import com.fiap.easyconsult.core.domain.model.Professional;
-import com.fiap.easyconsult.core.domain.model.UpdateConsult;
+import com.fiap.easyconsult.core.domain.model.*;
+import com.fiap.easyconsult.core.domain.valueobject.ConsultStatus;
 import com.fiap.easyconsult.core.inputport.ConsultCommandUseCase;
 import com.fiap.easyconsult.core.inputport.ConsultQueryUseCase;
 import com.fiap.easyconsult.infra.entrypoint.controller.GraphqlController;
@@ -73,6 +70,7 @@ class GraphqlControllerTest {
                 .patient(patient)
                 .professional(professional)
                 .dateTime(LocalDate.now().plusDays(7), LocalTime.of(14, 30))
+                .status(ConsultStatus.SCHEDULED)
                 .build();
 
         validResponseDto = mock(ConsultationResponseDto.class);

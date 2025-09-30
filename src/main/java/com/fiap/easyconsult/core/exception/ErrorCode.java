@@ -6,7 +6,8 @@ public enum ErrorCode implements ErrorClassification {
     BUSINESS_RULE("Regra de negócio violada"),
     VALIDATION_ERROR("Erro de validação"),
     INTERNAL_ERROR("Erro interno inesperado"),
-    INVALID_ARGUMENT("Argumento inválido");
+    INVALID_ARGUMENT("Argumento inválido"),
+    FORBIDDEN("Acesso negado");
 
     private final String defaultMessage;
 

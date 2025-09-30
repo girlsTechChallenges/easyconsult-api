@@ -1,6 +1,9 @@
 package com.fiap.easyconsult.integration.graphql;
 
 import com.fiap.easyconsult.EasyconsultMain;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -13,6 +16,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
+import java.util.Date;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,6 +39,7 @@ public class GraphQLWorkingIntegrationTest {
 
     private HttpHeaders createHeaders() {
         HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(gerarTokenTeste());
         headers.setContentType(MediaType.APPLICATION_JSON);
         return headers;
     }
@@ -202,4 +209,17 @@ public class GraphQLWorkingIntegrationTest {
             assertThat(responseBody).containsKey("errors");
         }
     }
+
+    private String gerarTokenTeste() {
+        String secret = "test_secret_key_for_integration_tests_at_least_32_bytes_long";
+        Key key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+
+        return Jwts.builder()
+                .setSubject("exemplo@example.com")
+                .claim("scope", "paciente")
+                .setIssuedAt(new Date())
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
 }
