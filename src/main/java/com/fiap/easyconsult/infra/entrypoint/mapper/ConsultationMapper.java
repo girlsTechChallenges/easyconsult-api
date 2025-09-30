@@ -4,17 +4,19 @@ import com.fiap.easyconsult.core.domain.model.Consult;
 import com.fiap.easyconsult.core.domain.model.ConsultationFilter;
 import com.fiap.easyconsult.core.domain.model.Patient;
 import com.fiap.easyconsult.core.domain.model.Professional;
+import com.fiap.easyconsult.core.domain.model.UpdateConsult;
+import com.fiap.easyconsult.core.domain.valueobject.ConsultDateTime;
+import com.fiap.easyconsult.core.domain.valueobject.ConsultStatus;
 import com.fiap.easyconsult.infra.entrypoint.dto.data.PatientDataDto;
 import com.fiap.easyconsult.infra.entrypoint.dto.request.ConsultationFilterRequestDto;
 import com.fiap.easyconsult.infra.entrypoint.dto.request.ConsultationRequestDto;
+import com.fiap.easyconsult.infra.entrypoint.dto.request.ConsultationUpdateRequestDto;
 import com.fiap.easyconsult.infra.entrypoint.dto.response.ConsultationResponseDto;
-import com.fiap.easyconsult.infra.exception.MapperException;
 import com.fiap.easyconsult.infra.persistence.entity.ConsultationEntity;
 import com.fiap.easyconsult.infra.persistence.entity.PatientEntity;
 import com.fiap.easyconsult.infra.persistence.entity.ProfessionalEntity;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import static com.fiap.easyconsult.infra.entrypoint.dto.enums.StatusConsultation.SCHEDULED;
@@ -24,17 +26,20 @@ import static com.fiap.easyconsult.infra.entrypoint.dto.enums.StatusConsultation
 public class ConsultationMapper {
 
     public Consult toConsultation(ConsultationRequestDto request) {
-        var patientData = new Patient(null, request.patient().email(), request.patient().name());
-        var professionalData = new Professional(null, request.professional().email(), request.professional().name());
+        var dateTime = ConsultDateTime.of(request.date(), request.localTime());
+        dateTime.validateFutureDateTime();
 
-        return new Consult(
-                null,
-                request.reason(),
-                null,
-                patientData,
-                professionalData,
-                request.localTime(),
-                verifyDate(request.date()));
+        return new Consult.Builder()
+                .dateTime(dateTime.getDate(), dateTime.getTime())
+                .patient(new Patient.Builder()
+                        .name(request.patient().name())
+                        .email(request.patient().email())
+                        .build())
+                .professional(new Professional.Builder()
+                        .name(request.professional().name())
+                        .email(request.professional().email())
+                        .build())
+                .reason(request.reason()).build();
     }
 
     public ConsultationEntity toConsultationEntity(Consult consult){
@@ -48,7 +53,7 @@ public class ConsultationMapper {
         entity.setReason(consult.getReason());
         entity.setPatient(patientEntity);
         entity.setProfessional(professionalEntity);
-        entity.setLocalTime(consult.getLocalTime());
+        entity.setLocalTime(consult.getTime());
         entity.setLocalDate(consult.getDate());
         entity.setStatus(SCHEDULED.name());
         return entity;
@@ -56,23 +61,24 @@ public class ConsultationMapper {
     }
 
     public Consult toConsultation(ConsultationEntity entity){
-        var patient = new Patient(
-                entity.getPatient().getId(),
-                entity.getPatient().getEmail(),
-                entity.getPatient().getName());
-        var professional = new Professional(
-                entity.getProfessional().getId(),
-                entity.getProfessional().getEmail(),
-                entity.getProfessional().getName());
-
-        return new Consult(
-                entity.getId(),
-                entity.getReason(),
-                entity.getStatus(),
-                patient,
-                professional,
-                entity.getLocalTime(),
-                entity.getLocalDate());
+        var patient = new Patient.Builder()
+                .id(entity.getId())
+                .name(entity.getPatient().getName())
+                .email(entity.getPatient().getEmail())
+                .build();
+        var professional = new Professional.Builder()
+                .id(entity.getId())
+                .name(entity.getProfessional().getName())
+                .email(entity.getProfessional().getEmail())
+                .build();
+        return new Consult.Builder()
+                .id(entity.getId())
+                .dateTime(entity.getLocalDate(), entity.getLocalTime())
+                .patient(patient)
+                .professional(professional)
+                .reason(entity.getReason())
+                .status(ConsultStatus.valueOf(entity.getStatus()))
+                .build();
     }
 
     public ConsultationFilter toConsultationFilter(ConsultationFilterRequestDto request) {
@@ -93,22 +99,35 @@ public class ConsultationMapper {
 
     public ConsultationResponseDto toConsultationResponse(Consult consult) {
         return new ConsultationResponseDto(
-                consult.getId(),
+                consult.getId().getValue(),
                 new PatientDataDto(
                         consult.getPatient().getName(),
                         consult.getPatient().getEmail()),
                 consult.getProfessional().getName(),
-                consult.getLocalTime(),
+                consult.getTime(),
                 consult.getDate(),
-                valueOf(consult.getStatus()),
+                valueOf(consult.getStatus().name()),
                 consult.getReason()
         );
     }
 
-    private LocalDate verifyDate(LocalDate date) {
-        if (date.isBefore(LocalDate.now())) {
-            throw new MapperException("Query data cannot be older than current data", "ERROR_INCONSISTENT_DATE");
+    public UpdateConsult toUpdateConsult(ConsultationUpdateRequestDto request) {
+        var builder = UpdateConsult.builder()
+                .id(request.id());
+
+        if (request.reason() != null) {
+            builder.reason(request.reason());
         }
-        return date;
+        if (request.date() != null) {
+            builder.date(request.date());
+        }
+        if (request.localTime() != null) {
+            builder.time(request.localTime());
+        }
+        if (request.status() != null) {
+            builder.status(ConsultStatus.valueOf(request.status().name()));
+        }
+
+        return builder.build();
     }
 }

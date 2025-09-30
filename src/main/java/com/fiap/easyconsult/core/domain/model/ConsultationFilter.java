@@ -2,11 +2,15 @@ package com.fiap.easyconsult.core.domain.model;
 
 import com.fiap.easyconsult.infra.entrypoint.dto.enums.StatusConsultation;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 public class ConsultationFilter implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private Long id;
     private String patientEmail;

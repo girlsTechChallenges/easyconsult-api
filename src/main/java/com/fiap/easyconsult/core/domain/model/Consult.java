@@ -1,5 +1,10 @@
 package com.fiap.easyconsult.core.domain.model;
 
+import com.fiap.easyconsult.core.domain.valueobject.ConsultDateTime;
+import com.fiap.easyconsult.core.domain.valueobject.ConsultId;
+import com.fiap.easyconsult.core.domain.valueobject.ConsultStatus;
+import com.fiap.easyconsult.core.exception.DomainException;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -10,87 +15,153 @@ public class Consult implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private Long id;
-    private String reason;
-    private String status;
-    private Patient patient;
-    private Professional professional;
-    private LocalTime localTime;
-    private LocalDate date;
+    private final ConsultId id;
+    private final String reason;
+    private ConsultStatus status;
+    private final Patient patient;
+    private final Professional professional;
+    private final ConsultDateTime dateTime;
 
-    public Consult(Long id, String reason, String status, Patient patient, Professional professional, LocalTime localTime, LocalDate date) {
-        this.id = id;
-        this.reason = reason;
-        this.status = status;
-        this.patient = patient;
-        this.professional = professional;
-        this.localTime = localTime;
-        this.date = date;
+    private Consult(Builder builder) {
+        validateConsult(builder);
+        this.id = builder.id;
+        this.reason = builder.reason;
+        this.status = builder.status;
+        this.patient = builder.patient;
+        this.professional = builder.professional;
+        this.dateTime = builder.dateTime;
     }
 
-    public Long getId() {
+    private void validateConsult(Builder builder) {
+        if (builder.reason == null || builder.reason.trim().isEmpty()) {
+            throw new DomainException("Consult reason cannot be empty", "CONSTRAINT_VIOLATION");
+        }
+        if (builder.patient == null) {
+            throw new DomainException("Patient cannot be null", "CONSTRAINT_VIOLATION");
+        }
+        if (builder.professional == null) {
+            throw new DomainException("Professional cannot be null", "CONSTRAINT_VIOLATION");
+        }
+        if (builder.dateTime == null) {
+            throw new DomainException("DateTime cannot be null", "CONSTRAINT_VIOLATION");
+        }
+    }
+
+    public void cancel() {
+        if (!status.canBeCancelled()) {
+            throw new DomainException("Cannot cancel a consult with status: " + status, "BUSINESS_RULE");
+        }
+        if (dateTime.isPast()) {
+            throw new DomainException("Cannot cancel a past consult", "BUSINESS_RULE");
+        }
+        this.status = ConsultStatus.CANCELLED;
+    }
+
+    public void complete() {
+        if (status != ConsultStatus.SCHEDULED) {
+            throw new DomainException("Only scheduled consults can be completed", "BUSINESS_RULE");
+        }
+        if (!dateTime.isPast()) {
+            throw new DomainException("Cannot complete a future consult", "BUSINESS_RULE");
+        }
+        this.status = ConsultStatus.COMPLETED;
+    }
+
+    public void markAsNoShow() {
+        if (status != ConsultStatus.SCHEDULED) {
+            throw new DomainException("Only scheduled consults can be marked as no-show", "BUSINESS_RULE");
+        }
+        if (!dateTime.isPast()) {
+            throw new DomainException("Cannot mark as no-show a future consult", "BUSINESS_RULE");
+        }
+        this.status = ConsultStatus.NO_SHOW;
+    }
+
+    public ConsultId getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getReason() {
         return reason;
     }
 
-    public void setReason(String reason) {
-        this.reason = reason;
-    }
-
-    public String getStatus() {
+    public ConsultStatus getStatus() {
         return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
     }
 
     public Patient getPatient() {
         return patient;
     }
 
-    public void setPatient(Patient patient) {
-        this.patient = patient;
-    }
-
     public Professional getProfessional() {
         return professional;
     }
 
-    public void setProfessional(Professional professional) {
-        this.professional = professional;
-    }
-
-    public LocalTime getLocalTime() {
-        return localTime;
-    }
-
-    public void setLocalTime(LocalTime localTime) {
-        this.localTime = localTime;
-    }
-
     public LocalDate getDate() {
-        return date;
+        return dateTime.getDate();
     }
 
-    public void setDate(LocalDate date) {
-        this.date = date;
+    public LocalTime getTime() {
+        return dateTime.getTime();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private ConsultId id;
+        private String reason;
+        private Patient patient;
+        private Professional professional;
+        private ConsultDateTime dateTime;
+        private ConsultStatus status;
+
+        public Builder id(Long id) {
+            this.id = ConsultId.of(id);
+            return this;
+        }
+
+        public Builder reason(String reason) {
+            this.reason = reason;
+            return this;
+        }
+
+        public Builder patient(Patient patient) {
+            this.patient = patient;
+            return this;
+        }
+
+        public Builder professional(Professional professional) {
+            this.professional = professional;
+            return this;
+        }
+
+        public Builder dateTime(LocalDate date, LocalTime time) {
+            this.dateTime = ConsultDateTime.of(date, time);
+            return this;
+        }
+
+        public Builder status(ConsultStatus status) {
+            this.status = status;
+            return this;
+        }
+
+        public Consult build() {
+            return new Consult(this);
+        }
     }
 
     @Override
-    public String toString() {
-        return "Consult{id=" + id +
-                ", patient=" + (patient != null ? patient.getEmail() : "null") +
-                ", professional=" + (professional != null ? professional.getEmail() : "null") +
-                ", date=" + date +
-                ", time=" + localTime +
-                ", status=" + status + "}";
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Consult consult = (Consult) o;
+        return id.equals(consult.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
     }
 }

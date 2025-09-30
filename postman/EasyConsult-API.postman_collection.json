@@ -1,0 +1,430 @@
+{
+	"info": {
+		"_postman_id": "easyconsult-api-collection",
+		"name": "EasyConsult API - GraphQL",
+		"description": "Collection para testar a API GraphQL do EasyConsult - Sistema de agendamento de consultas médicas",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "📋 Queries - Consultas",
+			"item": [
+				{
+					"name": "Buscar Todas as Consultas",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"query FindAllConsults {\\n    findAllConsults {\\n      id\\n      reason\\n      status\\n      localDate\\n      localTime\\n      patient {\\n        id\\n        name\\n        email\\n      }\\n      professional {\\n        id\\n        name\\n        email\\n      }\\n    }\\n  }\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Consulta por ID",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"query FindConsultById($id: ID!) {\\n    findConsultById(id: $id) {\\n      id\\n      reason\\n      status\\n      localDate\\n      localTime\\n      patient {\\n        id\\n        name\\n        email\\n      }\\n      professional {\\n        id\\n        name\\n        email\\n      }\\n    }\\n  }\",\n  \"variables\": {\n    \"id\": \"1\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Consultas com Filtros",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"query FindConsultsByFilter($patientId: ID, $professionalId: ID, $status: ConsultStatus) {\\n    findConsultsByFilter(\\n      patientId: $patientId\\n      professionalId: $professionalId\\n      status: $status\\n    ) {\\n      id\\n      reason\\n      status\\n      localDate\\n      localTime\\n      patient {\\n        name\\n        email\\n      }\\n      professional {\\n        name\\n        email\\n      }\\n    }\\n  }\",\n  \"variables\": {\n    \"patientId\": \"1\",\n    \"professionalId\": null,\n    \"status\": \"SCHEDULED\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "✏️ Mutations - Operações",
+			"item": [
+				{
+					"name": "Criar Nova Consulta",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"mutation CreateConsult($input: ConsultationCreateRequestDto!) {\\n    createConsult(input: $input)\\n  }\",\n  \"variables\": {\n    \"input\": {\n      \"reason\": \"Consulta de rotina\",\n      \"localDate\": \"2025-10-15\",\n      \"localTime\": \"14:30:00\",\n      \"patientId\": 1,\n      \"professionalId\": 1\n    }\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Consulta Existente",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"mutation UpdateConsult($input: ConsultationUpdateRequestDto!) {\\n    updateConsult(input: $input)\\n  }\",\n  \"variables\": {\n    \"input\": {\n      \"id\": \"1\",\n      \"reason\": \"Consulta de retorno - ATUALIZADA\",\n      \"localDate\": \"2025-10-20\",\n      \"localTime\": \"15:00:00\",\n      \"status\": \"CONFIRMED\",\n      \"patientId\": 1,\n      \"professionalId\": 1\n    }\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar Consulta",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"mutation DeleteConsult($id: ID!) {\\n    deleteConsult(id: $id)\\n  }\",\n  \"variables\": {\n    \"id\": \"1\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🧪 Cenários de Teste",
+			"item": [
+				{
+					"name": "Fluxo Completo - Criar → Listar → Atualizar → Deletar",
+					"item": [
+						{
+							"name": "1. Criar Consulta de Teste",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"query\": \"mutation {\\n    createConsult(input: {\\n      reason: \\\"Consulta de teste - Fluxo completo\\\"\\n      localDate: \\\"2025-11-01\\\"\\n      localTime: \\\"10:00:00\\\"\\n      patientId: 1\\n      professionalId: 1\\n    })\\n  }\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/graphql",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"graphql"
+									]
+								}
+							}
+						},
+						{
+							"name": "2. Listar Todas as Consultas",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"query\": \"query {\\n    findAllConsults {\\n      id\\n      reason\\n      status\\n      localDate\\n      localTime\\n    }\\n  }\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/graphql",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"graphql"
+									]
+								}
+							}
+						},
+						{
+							"name": "3. Atualizar Consulta Criada",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"query\": \"mutation {\\n    updateConsult(input: {\\n      id: \\\"{{consult_id}}\\\"\\n      reason: \\\"Consulta ATUALIZADA - Fluxo completo\\\"\\n      localDate: \\\"2025-11-02\\\"\\n      localTime: \\\"11:00:00\\\"\\n      status: CONFIRMED\\n      patientId: 1\\n      professionalId: 1\\n    })\\n  }\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/graphql",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"graphql"
+									]
+								}
+							}
+						},
+						{
+							"name": "4. Deletar Consulta",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"query\": \"mutation {\\n    deleteConsult(id: \\\"{{consult_id}}\\\")\\n  }\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/graphql",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"graphql"
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Teste de Filtros",
+					"item": [
+						{
+							"name": "Filtrar por Status SCHEDULED",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"query\": \"query {\\n    findConsultsByFilter(status: SCHEDULED) {\\n      id\\n      reason\\n      status\\n      localDate\\n      localTime\\n    }\\n  }\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/graphql",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"graphql"
+									]
+								}
+							}
+						},
+						{
+							"name": "Filtrar por Status CONFIRMED",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"query\": \"query {\\n    findConsultsByFilter(status: CONFIRMED) {\\n      id\\n      reason\\n      status\\n      localDate\\n      localTime\\n    }\\n  }\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/graphql",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"graphql"
+									]
+								}
+							}
+						},
+						{
+							"name": "Filtrar por Paciente ID",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"query\": \"query {\\n    findConsultsByFilter(patientId: \\\"1\\\") {\\n      id\\n      reason\\n      status\\n      patient {\\n        name\\n        email\\n      }\\n    }\\n  }\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/graphql",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"graphql"
+									]
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "🔍 Schema Introspection",
+			"item": [
+				{
+					"name": "Obter Schema GraphQL",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"query IntrospectionQuery {\\n    __schema {\\n      queryType { name }\\n      mutationType { name }\\n      types {\\n        ...FullType\\n      }\\n    }\\n  }\\n\\n  fragment FullType on __Type {\\n    kind\\n    name\\n    description\\n    fields(includeDeprecated: true) {\\n      name\\n      description\\n      args {\\n        ...InputValue\\n      }\\n      type {\\n        ...TypeRef\\n      }\\n    }\\n  }\\n\\n  fragment InputValue on __InputValue {\\n    name\\n    description\\n    type { ...TypeRef }\\n    defaultValue\\n  }\\n\\n  fragment TypeRef on __Type {\\n    kind\\n    name\\n    ofType {\\n      kind\\n      name\\n      ofType {\\n        kind\\n        name\\n      }\\n    }\\n  }\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8081",
+			"type": "string"
+		},
+		{
+			"key": "consult_id",
+			"value": "1",
+			"type": "string",
+			"description": "ID da consulta para testes de atualização/deleção"
+		}
+	]
+}
