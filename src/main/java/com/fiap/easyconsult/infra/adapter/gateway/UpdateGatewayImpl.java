@@ -19,6 +19,8 @@ import java.util.List;
 @Service
 public class UpdateGatewayImpl implements UpdateGateway {
 
+    private static final String CACHE_ALL_CONSULTS_KEY = "all-consults";
+
     private final ConsultationRepository repository;
     private final ConsultationMapper mapper;
     private final CacheManager cacheManager;
@@ -72,13 +74,13 @@ public class UpdateGatewayImpl implements UpdateGateway {
     }
 
     private void updateAllConsultsCache(Consult result) {
-        var cache = cacheManager.getCache("allConsults");
+        var cache = cacheManager.getCache(CACHE_ALL_CONSULTS_KEY);
         if (cache == null) {
             log.warn("Cache 'allConsults' not found");
             return;
         }
 
-        Object raw = cache.get("all-consults", Object.class);
+        Object raw = cache.get(CACHE_ALL_CONSULTS_KEY, Object.class);
         List<Consult> currentList = null;
 
         if (raw instanceof List<?> rawList) {
@@ -93,10 +95,10 @@ public class UpdateGatewayImpl implements UpdateGateway {
             List<Consult> updatedList = new ArrayList<>(currentList);
             updatedList.removeIf(c -> c.getId().equals(result.getId()));
             updatedList.add(result);
-            cache.put("all-consults", updatedList);
+            cache.put(CACHE_ALL_CONSULTS_KEY, updatedList);
             log.info("Consultation updated in cache");
         } else {
-            cache.put("all-consults", List.of(result));
+            cache.put(CACHE_ALL_CONSULTS_KEY, List.of(result));
             log.info("Cache initialized with updated consultation");
         }
 

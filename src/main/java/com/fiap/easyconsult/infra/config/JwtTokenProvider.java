@@ -41,16 +41,11 @@ public class JwtTokenProvider {
         String subject = claims.getSubject();
 
         Object scopeClaim = claims.get("scope");
-        List<String> scopes;
-        if (scopeClaim == null) {
-            scopes = List.of();
-        } else if (scopeClaim instanceof String)
-            scopes = Arrays.stream(((String) scopeClaim).split("[ ,]+")).filter(s -> !s.isBlank()).toList();
-        else if (scopeClaim instanceof List) {
-            scopes = ((List<?>) scopeClaim).stream().map(Object::toString).toList();
-        } else {
-            scopes = List.of();
-        }
+        List<String> scopes = switch (scopeClaim) {
+            case String string -> Arrays.stream(string.split("[ ,]+")).filter(s -> !s.isBlank()).toList();
+            case List list -> list.stream().map(Object::toString).toList();
+            case null, default -> List.of();
+        };
 
         Collection<SimpleGrantedAuthority> authorities = scopes.stream()
                 .map(s -> new SimpleGrantedAuthority("SCOPE_" + s))

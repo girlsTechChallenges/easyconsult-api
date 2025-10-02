@@ -22,7 +22,6 @@ import java.time.LocalTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -117,7 +116,7 @@ class ConsultCommandUseCasesTest {
             consultCommandUseCases.createConsultation(validConsult);
 
             // Then
-            verify(saveGateway, times(1)).save(eq(validConsult));
+            verify(saveGateway, times(1)).save(validConsult);
         }
     }
 
@@ -171,7 +170,7 @@ class ConsultCommandUseCasesTest {
             consultCommandUseCases.updateConsultation(updateConsult);
 
             // Then
-            verify(updateGateway, times(1)).update(eq(updateConsult));
+            verify(updateGateway, times(1)).update(updateConsult);
         }
     }
 
@@ -220,7 +219,7 @@ class ConsultCommandUseCasesTest {
             consultCommandUseCases.deleteConsultation(consultId);
 
             // Then
-            verify(deleteGateway, times(1)).delete(eq(consultId));
+            verify(deleteGateway, times(1)).delete(consultId);
         }
     }
 

@@ -1,11 +1,15 @@
 package com.fiap.easyconsult.core.domain.valueobject;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
 
-public class ConsultDateTime {
+public class ConsultDateTime implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
     private final LocalDate date;
     private final LocalTime time;
 

@@ -11,9 +11,9 @@ import java.util.Map;
 public class CustomGraphQLError implements GraphQLError {
 
     private final String message;
-    private final List<Object> path;
-    private final Map<String, Object> extensions;
-    private final ErrorClassification errorType;
+    private final transient List<Object> path;
+    private final transient Map<String, Object> extensions;
+    private final transient ErrorClassification errorType;
 
     public CustomGraphQLError(String message, List<Object> path, Map<String, Object> extensions, ErrorClassification errorType) {
         this.message = message;

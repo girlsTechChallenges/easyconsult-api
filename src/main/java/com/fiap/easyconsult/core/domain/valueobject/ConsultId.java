@@ -1,8 +1,12 @@
 package com.fiap.easyconsult.core.domain.valueobject;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Objects;
 
-public class ConsultId {
+public class ConsultId implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
     private final Long value;
 
     private ConsultId(Long value) {

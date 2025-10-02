@@ -1,15 +1,10 @@
 package com.fiap.easyconsult.integration.usecase;
 
 import com.fiap.easyconsult.EasyconsultMain;
-import com.fiap.easyconsult.core.domain.model.Consult;
-import com.fiap.easyconsult.core.domain.model.Patient;
-import com.fiap.easyconsult.core.domain.model.Professional;
-import com.fiap.easyconsult.core.domain.model.ConsultationFilter;
-import com.fiap.easyconsult.core.domain.model.UpdateConsult;
+import com.fiap.easyconsult.core.domain.model.*;
 import com.fiap.easyconsult.core.domain.valueobject.ConsultStatus;
 import com.fiap.easyconsult.core.inputport.ConsultCommandUseCase;
 import com.fiap.easyconsult.core.inputport.ConsultQueryUseCase;
-import com.fiap.easyconsult.infra.entrypoint.dto.enums.StatusConsultation;
 import com.fiap.easyconsult.integration.config.TestConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
