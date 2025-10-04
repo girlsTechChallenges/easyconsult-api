@@ -7,6 +7,7 @@ import com.fiap.easyconsult.infra.kafka.dto.PatientData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.KafkaException;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
@@ -50,7 +51,7 @@ public class KafkaMessageService {
             
         } catch (Exception e) {
             log.error("❌ Erro inesperado ao publicar mensagem no tópico: {}", consultTopic, e);
-            throw new RuntimeException("Falha ao publicar mensagem de consulta", e);
+            throw new KafkaException("Falha ao publicar mensagem de consulta", e);
         }
     }
 
@@ -83,12 +84,12 @@ public class KafkaMessageService {
             
         } catch (Exception e) {
             log.error("❌ Erro inesperado ao publicar consulta no Kafka - ID: {}", consult.getId().getValue(), e);
-            throw new RuntimeException("Falha ao publicar evento de consulta no Kafka", e);
+            throw new KafkaException("Falha ao publicar evento de consulta no Kafka", e);
         }
     }
 
     private ConsultationKafkaMessage buildConsultationMessage(Consult consult) {
-        var consultationMessage = new ConsultationKafkaMessage(
+        return new ConsultationKafkaMessage(
             consult.getId().getValue().toString(),
             consult.getProfessional().getName(),
             new PatientData(
@@ -100,6 +101,5 @@ public class KafkaMessageService {
             consult.getReason(),
             consult.getStatus().name()
         );
-        return consultationMessage;
     }
 }
