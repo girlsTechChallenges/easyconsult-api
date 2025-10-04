@@ -1,6 +1,8 @@
 package com.fiap.easyconsult.integration.config;
 
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
@@ -52,4 +54,11 @@ public class TestConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+    @Bean
+    @Primary
+    public CacheManager testCacheManager() {
+        return new ConcurrentMapCacheManager("consults", "allConsults", "consultsByFilter");
+    }
+
 }

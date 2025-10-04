@@ -15,7 +15,7 @@ public class UpdateConsult implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final ConsultId id;
-     private Professional professional;
+    private Professional professional;
     private String reason;
     private LocalDate date;
     private LocalTime time;

@@ -5,7 +5,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("ConsultStatus Value Object Tests")
 class ConsultStatusTest {
@@ -35,20 +36,10 @@ class ConsultStatusTest {
         }
 
         @Test
-        @DisplayName("COMPLETED status cannot be cancelled")
-        void completedStatusCannotBeCancelled() {
+        @DisplayName("CARRIED_OUT status cannot be cancelled")
+        void carriedOutStatusCannotBeCancelled() {
             // Given
-            ConsultStatus status = ConsultStatus.COMPLETED;
-
-            // When & Then
-            assertFalse(status.canBeCancelled());
-        }
-
-        @Test
-        @DisplayName("NO_SHOW status cannot be cancelled")
-        void noShowStatusCannotBeCancelled() {
-            // Given
-            ConsultStatus status = ConsultStatus.NO_SHOW;
+            ConsultStatus status = ConsultStatus.CARRIED_OUT;
 
             // When & Then
             assertFalse(status.canBeCancelled());
@@ -80,20 +71,10 @@ class ConsultStatusTest {
         }
 
         @Test
-        @DisplayName("COMPLETED status is finalized")
-        void completedStatusIsFinalized() {
+        @DisplayName("CARRIED_OUT status is finalized")
+        void carriedOutStatusIsFinalized() {
             // Given
-            ConsultStatus status = ConsultStatus.COMPLETED;
-
-            // When & Then
-            assertTrue(status.isFinalized());
-        }
-
-        @Test
-        @DisplayName("NO_SHOW status is finalized")
-        void noShowStatusIsFinalized() {
-            // Given
-            ConsultStatus status = ConsultStatus.NO_SHOW;
+            ConsultStatus status = ConsultStatus.CARRIED_OUT;
 
             // When & Then
             assertTrue(status.isFinalized());

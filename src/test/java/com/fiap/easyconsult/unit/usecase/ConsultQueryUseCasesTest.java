@@ -23,7 +23,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -83,8 +82,8 @@ class ConsultQueryUseCasesTest {
             // Then
             assertNotNull(result);
             assertEquals(1, result.size());
-            assertEquals(validConsultList.get(0).getId(), result.get(0).getId());
-            assertEquals(validConsultList.get(0).getReason(), result.get(0).getReason());
+            assertEquals(validConsultList.getFirst().getId(), result.getFirst().getId());
+            assertEquals(validConsultList.getFirst().getReason(), result.getFirst().getReason());
             
             verify(findByGateway, times(1)).findWithFilters(validFilter);
         }
@@ -151,7 +150,7 @@ class ConsultQueryUseCasesTest {
             consultQueryUseCases.findWithFilters(validFilter);
 
             // Then
-            verify(findByGateway, times(1)).findWithFilters(eq(validFilter));
+            verify(findByGateway, times(1)).findWithFilters(validFilter);
         }
     }
 
@@ -171,8 +170,8 @@ class ConsultQueryUseCasesTest {
             // Then
             assertNotNull(result);
             assertEquals(1, result.size());
-            assertEquals(validConsultList.get(0).getId(), result.get(0).getId());
-            assertEquals(validConsultList.get(0).getReason(), result.get(0).getReason());
+            assertEquals(validConsultList.getFirst().getId(), result.getFirst().getId());
+            assertEquals(validConsultList.getFirst().getReason(), result.getFirst().getReason());
             
             verify(findByGateway, times(1)).findAll();
         }

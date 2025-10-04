@@ -7,7 +7,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest(classes = EasyconsultMain.class)
 @ActiveProfiles("test")
-public class SimpleIntegrationTest {
+class SimpleIntegrationTest {
 
     @Test
     void contextLoads() {

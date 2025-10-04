@@ -1,8 +1,12 @@
 package com.fiap.easyconsult.core.domain.valueobject;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Objects;
 
-public class ConsultId {
+public class ConsultId implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
     private final Long value;
 
     private ConsultId(Long value) {
@@ -31,10 +35,5 @@ public class ConsultId {
         if (!(o instanceof ConsultId)) return false;
         ConsultId that = (ConsultId) o;
         return Objects.equals(value, that.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(value);
     }
 }

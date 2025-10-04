@@ -298,8 +298,8 @@ class GraphqlControllerTest {
             graphqlController.createFullConsultation(validRequestDto);
 
             // Then
-            verify(mapper, times(1)).toConsultation(eq(validRequestDto));
-            verify(mapper, times(1)).toConsultationResponse(eq(validConsult));
+            verify(mapper, times(1)).toConsultation(validRequestDto);
+            verify(mapper, times(1)).toConsultationResponse(validConsult);
         }
 
         @Test

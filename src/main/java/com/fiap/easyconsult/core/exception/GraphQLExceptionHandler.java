@@ -45,7 +45,7 @@ public class GraphQLExceptionHandler extends DataFetcherExceptionResolverAdapter
             return buildBusinessError(iae.getMessage(), "INVALID_ARGUMENT", path, timestamp, traceId, ErrorCode.INVALID_ARGUMENT);
         }
 
-        if (rootCause instanceof AuthorizationDeniedException ade) {
+        if (rootCause instanceof AuthorizationDeniedException) {
             return buildBusinessError(
                     "Acesso negado: você não tem permissão para executar esta operação.",
                     "ACCESS_DENIED",
