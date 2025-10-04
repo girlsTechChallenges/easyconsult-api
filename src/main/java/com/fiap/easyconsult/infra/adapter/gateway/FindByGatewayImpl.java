@@ -3,6 +3,9 @@ package com.fiap.easyconsult.infra.adapter.gateway;
 import com.fiap.easyconsult.core.domain.model.Consult;
 import com.fiap.easyconsult.core.domain.model.ConsultationFilter;
 import com.fiap.easyconsult.core.outputport.FindByGateway;
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import com.fiap.easyconsult.infra.entrypoint.mapper.ConsultationMapper;
 import com.fiap.easyconsult.infra.persistence.entity.ConsultationEntity;
 import com.fiap.easyconsult.infra.persistence.repository.ConsultationRepository;
@@ -10,7 +13,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +38,9 @@ public class FindByGatewayImpl implements FindByGateway {
 
     @Override
     @Cacheable(value = "consultsByFilter", key = "#filter.hashCode()")
+    @CircuitBreaker(name = "findService", fallbackMethod = "findWithFiltersFallback")
+    @Retry(name = "findService")
+    @Bulkhead(name = "findService", type = Bulkhead.Type.SEMAPHORE)
     public List<Consult> findWithFilters(ConsultationFilter filter) {
         log.info("Searching consultations with filters: {}", filter);
 
@@ -67,6 +72,9 @@ public class FindByGatewayImpl implements FindByGateway {
     }
 
     @Override
+    @CircuitBreaker(name = "findService", fallbackMethod = "findAllFallback")
+    @Retry(name = "findService")
+    @Bulkhead(name = "findService", type = Bulkhead.Type.SEMAPHORE)
     public List<Consult> findAll() {
         log.info("Searching all consultations with details");
 
@@ -82,6 +90,17 @@ public class FindByGatewayImpl implements FindByGateway {
             log.error("Error while fetching all consultations", e);
             throw e;
         }
+    }
+
+    // fallbacks
+    private List<Consult> findWithFiltersFallback(ConsultationFilter filter, Throwable t) {
+        log.error("Fallback for findWithFilters invoked: {}", t.toString());
+        return new ArrayList<>();
+    }
+
+    private List<Consult> findAllFallback(Throwable t) {
+        log.error("Fallback for findAll invoked: {}", t.toString());
+        return new ArrayList<>();
     }
 
     private void addCondition(Object valor, String campo, String nameParameter,

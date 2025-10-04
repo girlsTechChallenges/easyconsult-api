@@ -2,6 +2,9 @@ package com.fiap.easyconsult.infra.adapter.gateway;
 
 import com.fiap.easyconsult.core.domain.model.Consult;
 import com.fiap.easyconsult.core.outputport.SaveGateway;
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import com.fiap.easyconsult.infra.entrypoint.mapper.ConsultationMapper;
 import com.fiap.easyconsult.infra.exception.GatewayException;
 import com.fiap.easyconsult.infra.persistence.entity.ConsultationEntity;
@@ -34,6 +37,9 @@ public class SaveGatewayImpl implements SaveGateway {
 
     @Override
     @CachePut(value = "consults", key = "#result.id.value")
+    @CircuitBreaker(name = "saveService", fallbackMethod = "saveFallback")
+    @Retry(name = "saveService")
+    @Bulkhead(name = "saveService", type = Bulkhead.Type.SEMAPHORE)
     public Consult save(Consult consult) {
         log.info("Saving consultation: {}", consult);
 
@@ -65,6 +71,12 @@ public class SaveGatewayImpl implements SaveGateway {
             log.error("Database error while saving consultation", ex);
             throw new GatewayException("Failed to persist consultation.", "DATABASE_ERROR");
         }
+    }
+
+    // fallback method for circuit breaker / retry
+    private Consult saveFallback(Consult consult, Throwable t) {
+        log.error("Fallback for save invoked: {}", t.toString());
+        throw new GatewayException("Resilience fallback: Failed to save consultation.", "DATABASE_ERROR");
     }
 
     private void updateAllConsultsCache(Consult result) {
