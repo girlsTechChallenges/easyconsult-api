@@ -4,6 +4,7 @@ import com.fiap.easyconsult.core.domain.model.Consult;
 import com.fiap.easyconsult.core.outputport.SaveGateway;
 import com.fiap.easyconsult.infra.entrypoint.mapper.ConsultationMapper;
 import com.fiap.easyconsult.infra.exception.GatewayException;
+import com.fiap.easyconsult.infra.kafka.service.KafkaMessageService;
 import com.fiap.easyconsult.infra.persistence.entity.ConsultationEntity;
 import com.fiap.easyconsult.infra.persistence.repository.ConsultationRepository;
 import lombok.extern.log4j.Log4j2;
@@ -23,13 +24,16 @@ public class SaveGatewayImpl implements SaveGateway {
     private final ConsultationRepository repository;
     private final ConsultationMapper mapper;
     private final CacheManager cacheManager;
+    private final KafkaMessageService kafkaMessageService;
 
     public SaveGatewayImpl(ConsultationRepository repository,
                            ConsultationMapper mapper,
-                           CacheManager cacheManager) {
+                           CacheManager cacheManager,
+                           KafkaMessageService kafkaMessageService) {
         this.repository = repository;
         this.mapper = mapper;
         this.cacheManager = cacheManager;
+        this.kafkaMessageService = kafkaMessageService;
     }
 
     @Override
@@ -37,18 +41,11 @@ public class SaveGatewayImpl implements SaveGateway {
     public Consult save(Consult consult) {
         log.info("Saving consultation: {}", consult);
 
-        if (consult.getPatient() == null || consult.getProfessional() == null) {
-            throw new GatewayException("Patient or Professional information is missing.", "CONSULT_VALIDATION_ERROR");
-        }
+        checkPatientAndProfessional(consult);
 
         List<ConsultationEntity> existingConsults = repository.findAllByPatientEmail(consult.getPatient().getEmail());
 
-        var dateConflicts = existingConsults.stream()
-                .anyMatch(c -> c.getLocalDate().isEqual(consult.getDate()) && c.getLocalTime().equals(consult.getTime()));
-
-        if (dateConflicts) {
-            throw new GatewayException("It is not permitted to schedule a new appointment for a date and time that already has an appointment registered.", "CONSULT_VALIDATION_ERROR");
-        }
+        checkForDateConflicts(consult, existingConsults);
 
         try {
             var entity = mapper.toConsultationEntity(consult);
@@ -56,6 +53,7 @@ public class SaveGatewayImpl implements SaveGateway {
             var result = mapper.toConsultation(saved);
 
             log.info("Saved consultation: {}", saved);
+            kafkaMessageService.publishConsultationEvent(result);
 
             updateAllConsultsCache(result);
 
@@ -64,6 +62,21 @@ public class SaveGatewayImpl implements SaveGateway {
         } catch (DataAccessException ex) {
             log.error("Database error while saving consultation", ex);
             throw new GatewayException("Failed to persist consultation.", "DATABASE_ERROR");
+        }
+    }
+
+    private void checkPatientAndProfessional(Consult consult) {
+        if (consult.getPatient() == null || consult.getProfessional() == null) {
+            throw new GatewayException("Patient or Professional information is missing.", "CONSULT_VALIDATION_ERROR");
+        }
+    }
+
+    private void checkForDateConflicts(Consult consult, List<ConsultationEntity> existingConsults) {
+        var dateConflicts = existingConsults.stream()
+                .anyMatch(c -> c.getLocalDate().isEqual(consult.getDate()) && c.getLocalTime().equals(consult.getTime()));
+
+        if (dateConflicts) {
+            throw new GatewayException("It is not permitted to schedule a new appointment for a date and time that already has an appointment registered.", "CONSULT_VALIDATION_ERROR");
         }
     }
 

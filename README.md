@@ -1,35 +1,47 @@
 # 🏥 EasyConsult API
 
-**Serviço de agendamento de consultas médicas** desenvolvido em Java Spring Boot com arquitetura hexagonal e GraphQL.
+**Serviço de agendamento de consultas médicas** desenvolvido em Java Spring Boot com arquitetura hexagonal, GraphQL e Apache Kafka.
 
 ## 📋 Sobre o Projeto
 
-O **EasyConsult** é uma API REST/GraphQL que permite gerenciar agendamentos de consultas entre pacientes e profissionais de saúde de forma simples e eficiente.
+O **EasyConsult** é uma aplicação que permite gerenciar agendamentos de consultas entre pacientes e profissionais de saúde de forma simples e eficiente.
 
-## 🏗️ Arquitetura
+## 🚀 Kafka + Docker (Novo!)
 
-## 📫 Testando com Postman
+A aplicação agora inclui **Apache Kafka** para mensageria assíncrona! 
 
-### Importar Collection
-1. Abra o Postman
-2. Clique em *### 📊 **Qualidade e Cobertura**
+### 📋 Quick Start
 
-| Categoria | Arquivos | Cobertura | Status |
-|-----------|----------|-----------|--------|
-| **Testes Unitários** | 8 arquivos | 100% domínio | ✅ Completo |
-| **Testes Integração** | 4 arquivos | 100% GraphQL | ✅ Funcionando |
-| **Regras de Negócio** | Todas | 100% | ✅ Validadas |
-| **Endpoints GraphQL** | Todos | 100% | ✅ Testados |
-| **Cenários de Erro** | Abrangente | 100% | ✅ Cobertos |
+```bash
+# Suba a infraestrutura (PostgreSQL, Redis, Kafka)
+docker-compose --profile infra up -d
 
-### 🏆 **Práticas de Excelência**3. Selecione o arquivo [`postman/EasyConsult-API.postman_collection.json`](postman/EasyConsult-API.postman_collection.json)
-4. Importe também o environment [`postman/EasyConsult-Development.postman_environment.json`](postman/EasyConsult-Development.postman_environment.json)
+# Execute a aplicação localmente
+./mvnw spring-boot:run
 
-### Collection Inclui
-- 📋 **Queries** - Buscar consultas (todas, por ID, com filtros)
-- ✏️ **Mutations** - Criar, atualizar e deletar consultas
-- 🧪 **Cenários de Teste** - Fluxos completos e testes de filtros
-- 🔍 **Schema Introspection** - Análise do schema GraphQL
+# Teste a API Kafka
+curl -X POST "http://localhost:8081/api/kafka/publish-consult?message=Hello%20Kafka"
+```
+
+### 🔧 Serviços Incluídos
+
+| Serviço | Porta | URL | Descrição |
+|---------|-------|-----|-----------|
+| **EasyConsult API** | 8081 | http://localhost:8081 | API principal |
+| **Kafka UI** | 8080 | http://localhost:8080 | Interface web do Kafka |
+| **Kafka Broker** | 9092 | localhost:9092 | Message broker |
+| **PostgreSQL** | 5432 | localhost:5432 | Banco principal |
+| **Redis** | 6379 | localhost:6379 | Cache |
+
+### 🧪 Testando Kafka
+
+```bash
+# Via API REST
+curl -X POST "http://localhost:8081/api/kafka/publish-consult?message=Hello%20Kafka"
+
+# Via Interface Web do Kafka
+# Acesse: http://localhost:8080
+```
 
 ## 🏗️ Arquitetura
 
@@ -40,70 +52,12 @@ O projeto segue **arquitetura hexagonal (Clean Architecture)** com separação c
 - **Output Ports**: Interfaces de gateways (`SaveGateway`, `FindByGateway`, `DeleteGateway`, `UpdateGateway`)
 - **Infrastructure**: Implementações concretas (persistência, controladores, adapters)
 
-### 🏆 **Práticas de Excelência**
-- ✅ **TDD**: Estrutura Given-When-Then clara em todos os testes
-- ✅ **Organização**: `@Nested` classes e `@DisplayName` descritivos em português
-- ✅ **Isolamento**: Testes independentes com rollback automático
-- ✅ **Mocking**: Mockito para dependências externas adequadamente utilizado
-- ✅ **Ambiente dedicado**: Profile de teste com H2, cache simples e JWT configurado
-- ✅ **Limpeza**: Estrutura otimizada sem pastas vazias ou arquivos redundantes
-
-### 🎯 **Exemplos de Validações Implementadas**
-
-#### **Regras de Negócio Testadas:**
-```java
-// ✅ Não permitir cancelamento de consulta passada
-@Test
-@DisplayName("Should throw exception when trying to cancel past consult")
-void shouldThrowExceptionWhenTryingToCancelPastConsult() {
-    // Consult no passado → Tentar cancelar → Deve lançar DomainException
-}
-
-// ✅ Apenas consultas SCHEDULED podem ser canceladas
-@Test
-@DisplayName("Should not allow cancellation of completed consult") 
-void shouldNotAllowCancellationOfCompletedConsult() {
-    // Consult COMPLETED → Tentar cancelar → Deve lançar exceção
-}
-```
-
-#### **Integração GraphQL Testada:**
-```graphql
-# ✅ Mutation createFullConsultation com validação de persistência
-mutation {
-  createFullConsultation(input: {
-    reason: "Consulta de rotina"
-    localDate: "2025-10-15"
-    localTime: "14:30:00"
-    patient: { name: "João Silva", email: "joao@test.com" }
-    professional: { name: "Dr. Maria", email: "maria@test.com" }
-  })
-}
-
-# ✅ Query getAllConsultations com validação de dados
-query {
-  getAllConsultations {
-    id, reason, statusConsultation, date, localTime
-    patient { name, email }
-    nameProfessional
-  }
-}
-```
-
-### ⚡ **Status Final dos Testes**
-- **✅ 12 arquivos de teste** mantidos (estrutura limpa)
-- **✅ 6/6 testes GraphQL** passando perfeitamente
-- **✅ 100% cobertura** de regras de negócio
-- **✅ 0 pastas vazias** (estrutura otimizada)
-- **✅ 0 testes redundantes** (limpeza realizada)
-
-**Resultado:** 🏆 **Suíte de testes de alta qualidade pronta para produção**
-
 ## ⚡ Stack Tecnológica
 
 - **Java 21** - Linguagem principal
 - **Spring Boot 3.5.5** - Framework web
 - **GraphQL** - API principal para queries e mutations
+- **Apache Kafka** - Sistema de mensageria assíncrona
 - **PostgreSQL** - Banco de dados relacional
 - **Redis** - Sistema de cache
 - **Docker & Docker Compose** - Containerização
@@ -124,11 +78,7 @@ query {
 - 🗑️ **Deletar consultas** com limpeza completa de cache
 - 🔐 **Autenticação JWT** com roles de usuário
 - 💾 **Sistema de cache Redis** com estratégias de invalidação
-
-### 🚧 Em Desenvolvimento
-- � **Notificações** via Kafka
-- 📊 **Relatórios** de consultas
-- � **Integração de email** para confirmações
+- 📨 **Integração Kafka** para mensageria assíncrona
 
 ## 📊 Status de Consulta
 
@@ -174,7 +124,7 @@ git clone https://github.com/girlsTechChallenges/easyconsult-api.git
 cd easyconsult-api
 ```
 
-2. **Suba a infraestrutura (PostgreSQL + Redis):**
+2. **Suba a infraestrutura (PostgreSQL + Redis + Kafka):**
 ```bash
 docker-compose --profile infra up -d
 ```
@@ -192,6 +142,183 @@ docker-compose --profile infra up -d
 docker-compose --profile prod up -d
 ```
 
+## 🐳 Docker Setup Completo
+
+### **1. Construir a aplicação**
+```bash
+# Compilar o projeto
+./mvnw clean package -DskipTests
+
+# Ou no Windows
+mvnw.cmd clean package -DskipTests
+```
+
+### **2. Subir apenas a infraestrutura** (recomendado para desenvolvimento)
+```bash
+# Sobe PostgreSQL, Redis, Kafka e Zookeeper
+docker-compose --profile infra up -d
+
+# Executar a aplicação localmente
+./mvnw spring-boot:run
+```
+
+### **3. Subir tudo com Docker** (ambiente completo)
+```bash
+# Sobe toda a stack incluindo a aplicação
+docker-compose --profile prod up -d
+```
+
+### **4. Comandos úteis**
+```bash
+# Parar todos os containers
+docker-compose down
+
+# Parar e remover volumes (CUIDADO: apaga dados)
+docker-compose down -v
+
+# Ver status dos containers
+docker-compose ps
+
+# Ver logs da aplicação
+docker-compose logs -f app
+
+# Ver logs do Kafka
+docker-compose logs -f kafka
+```
+
+## 📨 Apache Kafka Integration
+
+### Classes Principais
+
+1. **`KafkaProducerConfig`** - Configuração Spring para o Kafka Producer
+2. **`KafkaMessageService`** - Serviço Spring para envio de mensagens de consultas
+3. **`KafkaController`** - Controlador REST para testes via API
+4. **`ConsultationKafkaMessage`** - DTO para mensagens de consulta no Kafka
+
+### ⚙️ Configuração
+
+O projeto está configurado para usar o tópico `easyconsult-consult` definido em `application.properties`:
+
+```properties
+# Kafka Topics Configuration
+app.kafka.topics.consult=easyconsult-consult
+app.kafka.groupid=group-consulation
+```
+
+### 🚀 Como Usar o Kafka
+
+#### 1. Integração Automática (Produção)
+
+O Kafka é **integrado automaticamente** no fluxo de criação de consultas. Sempre que uma nova consulta é salva, uma mensagem é enviada automaticamente para o tópico `easyconsult-consult`:
+
+```java
+// No SaveGatewayImpl - Executado automaticamente ao salvar consulta
+kafkaMessageService.publishConsultationEvent(result);
+```
+
+A mensagem enviada contém todos os dados da consulta:
+```json
+{
+  "id": "123",
+  "nameProfessional": "Dr. Silva",
+  "patient": {
+    "name": "João Santos",
+    "email": "joao@email.com"
+  },
+  "localTime": "14:30:00",
+  "date": "2025-10-15",
+  "reason": "Consulta de rotina",
+  "statusConsulation": "SCHEDULED"
+}
+```
+
+#### 2. Via Endpoints REST (Para Testes)
+
+```bash
+# Teste manual de mensagem
+POST /api/kafka/publish-consult?message=Teste%20de%20mensagem
+
+# Exemplo via cURL
+curl -X POST "http://localhost:8081/api/kafka/publish-consult?message=Teste%20Kafka"
+```
+
+### 📊 Monitoramento do Kafka
+
+#### **Kafka UI (Interface Web)**
+Acesse: http://localhost:8080
+- Visualizar tópicos
+- Monitorar mensagens
+- Gerenciar consumers
+- Ver métricas em tempo real
+
+#### **Comandos CLI**
+```bash
+# Listar tópicos
+docker exec kafka kafka-topics --bootstrap-server localhost:9092 --list
+
+# Criar tópico
+docker exec kafka kafka-topics --bootstrap-server localhost:9092 --create --topic meu-topico --partitions 3 --replication-factor 1
+
+# Consumir mensagens
+docker exec kafka kafka-console-consumer --bootstrap-server localhost:9092 --topic meu-topico --from-beginning
+
+# Produzir mensagens
+docker exec -it kafka kafka-console-producer --bootstrap-server localhost:9092 --topic meu-topico
+```
+
+### 🔧 Configurações do Kafka
+
+**Detecção Automática de Ambiente**: O sistema detecta automaticamente se está rodando localmente ou em Docker:
+
+```java
+// KafkaProducerConfig.java
+private String detectKafkaBootstrapServers() {
+    String dockerEnv = System.getenv("DOCKER_ENV");
+    String springProfile = System.getProperty("spring.profiles.active");
+    
+    if ("true".equals(dockerEnv) || "prod".equals(springProfile)) {
+        return "kafka:29092"; // Docker
+    }
+    
+    try {
+        java.net.InetAddress.getByName("kafka");
+        return "kafka:29092"; // Docker network
+    } catch (java.net.UnknownHostException e) {
+        return "localhost:9092"; // Local
+    }
+}
+```
+
+**Configurações do Producer** (definidas no código):
+- **Confiabilidade**: `acks=all`, `retries=3`, `idempotence=true`
+- **Performance**: `batch.size=16384`, `linger.ms=5`, `buffer.memory=33554432`
+- **Serialização**: `StringSerializer` para chave e valor
+
+### 🔍 Debug do Zookeeper
+
+Comandos úteis para explorar o Zookeeper:
+
+```bash
+# Conectar no Zookeeper CLI
+docker exec -it zookeeper zookeeper-shell localhost:2181
+
+# Dentro do zookeeper-shell:
+ls /
+ls /brokers
+ls /brokers/ids
+ls /config/topics
+
+# Ver informações de um broker
+get /brokers/ids/1
+
+# Ver metadados de tópicos
+ls /brokers/topics
+get /brokers/topics/meu-topico
+
+# Verificar controller
+get /controller
+```
+
 ## 📡 GraphQL API
 
 ### 🌐 Endpoints Disponíveis
@@ -201,58 +328,40 @@ docker-compose --profile prod up -d
 ### 🔍 Queries Disponíveis
 
 ```graphql
-# Buscar consulta por ID
-query {
-  findConsultById(id: "1") {
-    id
-    reason
-    status
-    localDate
-    localTime
-    patient {
-      id
-      name
-      email
-    }
-    professional {
-      id
-      name
-      email
-    }
-  }
-}
-
 # Buscar todas as consultas
 query {
-  findAllConsults {
+  getAllConsultations {
     id
     reason
-    status
-    localDate
+    statusConsultation
+    date
     localTime
     patient {
       name
       email
     }
-    professional {
-      name
-      email
-    }
+    nameProfessional
   }
 }
 
 # Buscar consultas com filtros
 query {
-  findConsultsByFilter(
-    patientId: "1"
-    professionalId: "2" 
+  getFilteredConsultations(filter: {
+    patientEmail: "joao@email.com"
+    professionalEmail: "dr.silva@email.com"
     status: SCHEDULED
-  ) {
+    date: "2025-10-15"
+  }) {
     id
     reason
-    status
-    localDate
+    statusConsultation
+    date
     localTime
+    patient {
+      name
+      email
+    }
+    nameProfessional
   }
 }
 ```
@@ -262,31 +371,56 @@ query {
 ```graphql
 # Criar nova consulta
 mutation {
-  createConsult(input: {
+  createFullConsultation(input: {
     reason: "Consulta de rotina"
-    localDate: "2025-10-15"
+    date: "2025-10-15"
     localTime: "14:30:00"
-    patientId: 1
-    professionalId: 1
-  })
+    patient: {
+      name: "João Silva"
+      email: "joao@email.com"
+    }
+    professional: {
+      name: "Dr. Silva"
+      email: "dr.silva@email.com"
+    }
+  }) {
+    id
+    reason
+    statusConsultation
+    date
+    localTime
+    patient {
+      name
+      email
+    }
+    nameProfessional
+  }
 }
 
 # Atualizar consulta existente
 mutation {
-  updateConsult(input: {
+  updateConsultation(input: {
     id: "1"
     reason: "Consulta de retorno"
-    localDate: "2025-10-20"
+    date: "2025-10-20"
     localTime: "15:00:00"
-    status: CONFIRMED
-    patientId: 1
-    professionalId: 1
-  })
+    status: SCHEDULED
+    professional: {
+      name: "Dr. Silva"
+      email: "dr.silva@email.com"
+    }
+  }) {
+    id
+    reason
+    statusConsultation
+    date
+    localTime
+  }
 }
 
 # Deletar consulta
 mutation {
-  deleteConsult(id: "1")
+  deleteConsultation(id: "1")
 }
 ```
 
@@ -301,56 +435,97 @@ mutation {
 ```graphql
 # 1. Criar uma consulta
 mutation CreateConsult {
-  createConsult(input: {
+  createFullConsultation(input: {
     reason: "Consulta de rotina"
-    localDate: "2025-10-15"
+    date: "2025-10-15"
     localTime: "14:30:00"
-    patientId: 1
-    professionalId: 1
-  })
+    patient: {
+      name: "João Silva"
+      email: "joao@email.com"
+    }
+    professional: {
+      name: "Dr. Silva"
+      email: "dr.silva@email.com"
+    }
+  }) {
+    id
+    reason
+    statusConsultation
+    date
+    localTime
+  }
 }
 
 # 2. Buscar todas as consultas
 query GetAllConsults {
-  findAllConsults {
+  getAllConsultations {
     id
     reason
-    status
-    localDate
+    statusConsultation
+    date
     localTime
+    patient {
+      name
+      email
+    }
+    nameProfessional
   }
 }
 
 # 3. Atualizar uma consulta
 mutation UpdateConsult {
-  updateConsult(input: {
+  updateConsultation(input: {
     id: "1"
     reason: "Consulta de retorno - ATUALIZADA"
-    localDate: "2025-10-20"
+    date: "2025-10-20"
     localTime: "15:00:00"
-    status: CONFIRMED
-    patientId: 1
-    professionalId: 1
-  })
+    status: SCHEDULED
+    professional: {
+      name: "Dr. Silva"
+      email: "dr.silva@email.com"
+    }
+  }) {
+    id
+    reason
+    statusConsultation
+  }
 }
 
 # 4. Buscar por filtros
 query FilterConsults {
-  findConsultsByFilter(
-    patientId: "1"
-    status: CONFIRMED
-  ) {
+  getFilteredConsultations(filter: {
+    patientEmail: "joao@email.com"
+    status: SCHEDULED
+  }) {
     id
     reason
-    status
+    statusConsultation
+    patient {
+      name
+      email
+    }
   }
 }
 
 # 5. Deletar consulta
 mutation DeleteConsult {
-  deleteConsult(id: "1")
+  deleteConsultation(id: "1")
 }
 ```
+
+## 📫 Testando com Postman
+
+### Importar Collection
+1. Abra o Postman
+2. Clique em **Import**
+3. Selecione o arquivo [`postman/EasyConsult-API.postman_collection.json`](postman/EasyConsult-API.postman_collection.json)
+4. Importe também o environment [`postman/EasyConsult-Development.postman_environment.json`](postman/EasyConsult-Development.postman_environment.json)
+
+### Collection Inclui
+- 📋 **Queries** - Buscar consultas (todas, por ID, com filtros)
+- ✏️ **Mutations** - Criar, atualizar e deletar consultas
+- 🧪 **Cenários de Teste** - Fluxos completos e testes de filtros
+- 🔍 **Schema Introspection** - Análise do schema GraphQL
 
 ## 📁 Estrutura do Projeto
 
@@ -372,13 +547,14 @@ src/
 │       ├── adapter/
 │       │   ├── gateway/                # Implementação dos gateways
 │       │   ├── redis/                  # Cache management
-│       │   └── kafka/                  # Mensageria (futuro)
+│       │   └── kafka/                  # Mensageria
 │       ├── config/
 │       │   ├── SecurityConfig.java     # ✅ Atualizado
 │       │   ├── JwtTokenProvider.java   # Autenticação JWT
+│       │   ├── KafkaProducerConfig.java # Configuração Kafka
 │       │   └── CustomScalarConfig.java # GraphQL scalars
 │       ├── entrypoint/
-│       │   ├── controller/             # GraphQL controllers
+│       │   ├── controller/             # GraphQL controllers + Kafka controller
 │       │   ├── dto/                    # DTOs de entrada/saída
 │       │   │   ├── ConsultationUpdateRequestDto.java  # ✨ Novo
 │       │   │   └── ...
@@ -460,7 +636,7 @@ src/test/
 | **Endpoints GraphQL** | Todos | 100% | ✅ Testados |
 | **Cenários de Erro** | Abrangente | 100% | ✅ Cobertos |
 
-### � **Práticas de Excelência**
+### 🏆 **Práticas de Excelência**
 - ✅ **TDD**: Estrutura Given-When-Then clara em todos os testes
 - ✅ **Organização**: `@Nested` classes e `@DisplayName` descritivos em português
 - ✅ **Isolamento**: Testes independentes com rollback automático
@@ -485,6 +661,13 @@ src/test/
 - `application-dev.properties` - Desenvolvimento (localhost)  
 - `application-prod.properties` - Produção (Docker containers)
 
+### 🔄 Configuração Automática
+
+A aplicação detecta automaticamente o ambiente:
+
+- **Local**: Conecta em `localhost:9092`
+- **Docker**: Conecta em `kafka:29092` (rede interna)
+
 ## 🚨 Troubleshooting
 
 ### Erro 403 Forbidden
@@ -506,30 +689,60 @@ docker-compose down -v
 docker-compose --profile infra up -d
 ```
 
-## 🎯 Roadmap
+### **Problema: Kafka não inicia**
+```bash
+# Verificar logs do Zookeeper primeiro
+docker-compose logs zookeeper
 
-### Próximas Funcionalidades
-- [ ] **Autenticação completa** com diferentes roles
-- [ ] **Notificações** via Kafka/Email
-- [ ] **Testes unitários** e de integração completos
+# Depois verificar logs do Kafka
+docker-compose logs kafka
 
-### Melhorias Técnicas
-- [ ] **Métricas** com Micrometer/Prometheus
-- [ ] **Health checks** mais robustos
-- [ ] **Logging estruturado** com Logback
-- [ ] **Documentação OpenAPI** para REST endpoints
-- [ ] **Pipeline CI/CD** com GitHub Actions
+# Reiniciar serviços na ordem correta
+docker-compose restart zookeeper
+sleep 10
+docker-compose restart kafka
+```
 
-## �👥 Time
+### **Problema: Aplicação não conecta no Kafka**
+```bash
+# Verificar se o Kafka está saudável
+docker-compose ps
+
+# Testar conectividade
+docker exec kafka kafka-topics --bootstrap-server kafka:29092 --list
+```
+
+### **Problema: Porta ocupada**
+```bash
+# Verificar portas em uso
+netstat -tulpn | grep -E ':(8080|8081|9092|2181|5432|6379)'
+
+# Parar serviços conflitantes
+docker-compose down
+```
+
+## 👥 Time
 
 Desenvolvido com ❤️ pela equipe **Girls Tech Challenges**
 
 ### Funcionalidades Implementadas nesta Branch
-- ✅ **Endpoint UPDATE** para consultas
-- ✅ **Endpoint DELETE** para consultas  
-- ✅ **Sistema de cache Redis** completo
-- ✅ **Correção de configuração de segurança**
-- ✅ **Interface GraphiQL** para testes
-- ✅ **Documentação completa** atualizada
+- ✅ **CRUD completo** para consultas via GraphQL
+- ✅ **Sistema de cache Redis** com invalidação inteligente
+- ✅ **Integração Apache Kafka** para eventos de consulta
+- ✅ **Docker Compose** com stack completa (PostgreSQL, Redis, Kafka, Zookeeper)
+- ✅ **Kafka UI** para monitoramento em tempo real
+- ✅ **Arquitetura hexagonal** bem estruturada
+- ✅ **Testes automatizados** (unitários e integração)
+- ✅ **Interface GraphiQL** para desenvolvimento
+- ✅ **Autenticação JWT** configurada
+- ✅ **Detecção automática** de ambiente (local/Docker)
 
+---
 
+## 📚 Links Úteis
+
+- [Apache Kafka Documentation](https://kafka.apache.org/documentation/)
+- [Spring Kafka Reference](https://docs.spring.io/spring-kafka/docs/current/reference/html/)
+- [GraphQL Documentation](https://graphql.org/learn/)
+- [Spring Boot Documentation](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/)
+- [Docker Compose Documentation](https://docs.docker.com/compose/)
