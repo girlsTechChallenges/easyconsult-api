@@ -210,151 +210,67 @@ class ConsultTest {
                 assertEquals("BUSINESS_RULE", exception.getCode());
             }
 
-            @Test
-            @DisplayName("Should complete scheduled consult in the past")
-            void shouldCompleteScheduledConsultInPast() {
-                // Given
-                Consult consult = Consult.builder()
-                        .id(1L)
-                        .reason("Consulta de rotina")
-                        .patient(patient)
-                        .professional(professional)
-                        .dateTime(pastDate, consultTime)
-                        .status(status)
-                        .build();
+            @Nested
+            @DisplayName("Consult Business Rules Tests")
+            class ConsultBusinessRulesTests {
 
-                // When
-                consult.complete();
+                @Test
+                @DisplayName("Should cancel scheduled consult in the future")
+                void shouldCancelScheduledConsultInFuture() {
+                    // Given
+                    Consult consult = Consult.builder()
+                            .id(1L)
+                            .reason("Consulta de rotina")
+                            .patient(patient)
+                            .professional(professional)
+                            .dateTime(futureDate, consultTime)
+                            .status(ConsultStatus.SCHEDULED)
+                            .build();
 
-                // Then
-                assertEquals(ConsultStatus.COMPLETED, consult.getStatus());
-            }
+                    // When
+                    consult.cancel();
 
-            @Test
-            @DisplayName("Should throw exception when trying to complete future consult")
-            void shouldThrowExceptionWhenTryingToCompleteFutureConsult() {
-                // Given
-                Consult consult = Consult.builder()
-                        .id(1L)
-                        .reason("Consulta de rotina")
-                        .patient(patient)
-                        .professional(professional)
-                        .dateTime(futureDate, consultTime)
-                        .status(status)
-                        .build();
+                    // Then
+                    assertEquals(ConsultStatus.CANCELLED, consult.getStatus());
+                }
 
-                // When & Then
-                DomainException exception = assertThrows(DomainException.class, consult::complete);
-                assertEquals("Cannot complete a future consult", exception.getMessage());
-                assertEquals("BUSINESS_RULE", exception.getCode());
-            }
+                @Test
+                @DisplayName("Should throw exception when trying to cancel carried out consult")
+                void shouldThrowExceptionWhenTryingToCancelCarriedOutConsult() {
+                    // Given
+                    Consult consult = Consult.builder()
+                            .id(1L)
+                            .reason("Consulta de rotina")
+                            .patient(patient)
+                            .professional(professional)
+                            .dateTime(pastDate, consultTime)
+                            .status(ConsultStatus.CARRIED_OUT)
+                            .build();
 
-            @Test
-            @DisplayName("Should mark scheduled consult as no-show in the past")
-            void shouldMarkScheduledConsultAsNoShowInPast() {
-                // Given
-                Consult consult = Consult.builder()
-                        .id(1L)
-                        .reason("Consulta de rotina")
-                        .patient(patient)
-                        .professional(professional)
-                        .dateTime(pastDate, consultTime)
-                        .status(status)
-                        .build();
+                    // When & Then
+                    DomainException exception = assertThrows(DomainException.class, consult::cancel);
+                    assertEquals("Cannot cancel a consult with status: CARRIED_OUT", exception.getMessage());
+                    assertEquals("BUSINESS_RULE", exception.getCode());
+                }
 
+                @Test
+                @DisplayName("Should throw exception when trying to cancel past consult")
+                void shouldThrowExceptionWhenTryingToCancelPastConsult() {
+                    // Given
+                    Consult consult = Consult.builder()
+                            .id(1L)
+                            .reason("Consulta de rotina")
+                            .patient(patient)
+                            .professional(professional)
+                            .dateTime(pastDate, consultTime)
+                            .status(ConsultStatus.SCHEDULED)
+                            .build();
 
-                // When
-                consult.markAsNoShow();
-
-                // Then
-                assertEquals(ConsultStatus.NO_SHOW, consult.getStatus());
-            }
-
-            @Test
-            @DisplayName("Should throw exception when trying to mark future consult as no-show")
-            void shouldThrowExceptionWhenTryingToMarkFutureConsultAsNoShow() {
-                // Given
-                Consult consult = Consult.builder()
-                        .id(1L)
-                        .reason("Consulta de rotina")
-                        .patient(patient)
-                        .professional(professional)
-                        .dateTime(futureDate, consultTime)
-                        .status(status)
-                        .build();
-
-                // When & Then
-                DomainException exception = assertThrows(DomainException.class, consult::markAsNoShow);
-                assertEquals("Cannot mark as no-show a future consult", exception.getMessage());
-                assertEquals("BUSINESS_RULE", exception.getCode());
-            }
-        }
-
-        @Nested
-        @DisplayName("Consult Business Rules Tests")
-        class ConsultBusinessRulesTests {
-
-            @Test
-            @DisplayName("Should not allow cancellation of completed consult")
-            void shouldNotAllowCancellationOfCompletedConsult() {
-                // Given
-                Consult consult = Consult.builder()
-                        .id(1L)
-                        .reason("Consulta de rotina")
-                        .patient(patient)
-                        .professional(professional)
-                        .dateTime(pastDate, consultTime)
-                        .status(status)
-                        .build();
-
-                consult.complete();
-
-                // When & Then
-                DomainException exception = assertThrows(DomainException.class, consult::cancel);
-                assertEquals("Cannot cancel a consult with status: COMPLETED", exception.getMessage());
-                assertEquals("BUSINESS_RULE", exception.getCode());
-            }
-
-            @Test
-            @DisplayName("Should not allow completion of cancelled consult")
-            void shouldNotAllowCompletionOfCancelledConsult() {
-                // Given
-                Consult consult = Consult.builder()
-                        .id(1L)
-                        .reason("Consulta de rotina")
-                        .patient(patient)
-                        .professional(professional)
-                        .dateTime(futureDate, consultTime)
-                        .status(status)
-                        .build();
-
-                consult.cancel();
-
-                // When & Then
-                DomainException exception = assertThrows(DomainException.class, consult::complete);
-                assertEquals("Only scheduled consults can be completed", exception.getMessage());
-                assertEquals("BUSINESS_RULE", exception.getCode());
-            }
-
-            @Test
-            @DisplayName("Should not allow marking cancelled consult as no-show")
-            void shouldNotAllowMarkingCancelledConsultAsNoShow() {
-                // Given
-                Consult consult = Consult.builder()
-                        .id(1L)
-                        .reason("Consulta de rotina")
-                        .patient(patient)
-                        .professional(professional)
-                        .dateTime(futureDate, consultTime)
-                        .status(status)
-                        .build();
-
-                consult.cancel();
-
-                // When & Then
-                DomainException exception = assertThrows(DomainException.class, consult::markAsNoShow);
-                assertEquals("Only scheduled consults can be marked as no-show", exception.getMessage());
-                assertEquals("BUSINESS_RULE", exception.getCode());
+                    // When & Then
+                    DomainException exception = assertThrows(DomainException.class, consult::cancel);
+                    assertEquals("Cannot cancel a past consult", exception.getMessage());
+                    assertEquals("BUSINESS_RULE", exception.getCode());
+                }
             }
         }
     }

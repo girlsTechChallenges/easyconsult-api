@@ -6,7 +6,7 @@ scalar Date
 
 enum ConsultationStatus {
     SCHEDULED
-    CONFIRMED
+    CARRIED_OUT
     CANCELLED
 }
 

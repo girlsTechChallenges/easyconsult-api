@@ -36,9 +36,4 @@ public class ConsultId implements Serializable {
         ConsultId that = (ConsultId) o;
         return Objects.equals(value, that.value);
     }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(value);
-    }
 }

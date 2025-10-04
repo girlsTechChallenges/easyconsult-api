@@ -9,6 +9,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Objects;
 
 public class Consult implements Serializable {
 
@@ -55,26 +56,6 @@ public class Consult implements Serializable {
             throw new DomainException("Cannot cancel a past consult", "BUSINESS_RULE");
         }
         this.status = ConsultStatus.CANCELLED;
-    }
-
-    public void complete() {
-        if (status != ConsultStatus.SCHEDULED) {
-            throw new DomainException("Only scheduled consults can be completed", "BUSINESS_RULE");
-        }
-        if (!dateTime.isPast()) {
-            throw new DomainException("Cannot complete a future consult", "BUSINESS_RULE");
-        }
-        this.status = ConsultStatus.COMPLETED;
-    }
-
-    public void markAsNoShow() {
-        if (status != ConsultStatus.SCHEDULED) {
-            throw new DomainException("Only scheduled consults can be marked as no-show", "BUSINESS_RULE");
-        }
-        if (!dateTime.isPast()) {
-            throw new DomainException("Cannot mark as no-show a future consult", "BUSINESS_RULE");
-        }
-        this.status = ConsultStatus.NO_SHOW;
     }
 
     public ConsultId getId() {
@@ -154,14 +135,11 @@ public class Consult implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Consult consult = (Consult) o;
-        return id.equals(consult.id);
+        return this == o || (o instanceof Consult consult && id.equals(consult.id));
     }
 
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return Objects.hash(id);
     }
 }

@@ -1,6 +1,7 @@
 package com.fiap.easyconsult.unit.domain.valueobject;
 
 import com.fiap.easyconsult.core.domain.valueobject.ConsultDateTime;
+import com.fiap.easyconsult.core.exception.DomainException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -42,7 +43,7 @@ class ConsultDateTimeTest {
             LocalTime time = LocalTime.of(14, 30);
 
             // When & Then
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+            DomainException exception = assertThrows(DomainException.class, () ->
                     ConsultDateTime.of(null, time)
             );
 
@@ -56,7 +57,7 @@ class ConsultDateTimeTest {
             LocalDate date = LocalDate.of(2025, 10, 15);
 
             // When & Then
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+            DomainException exception = assertThrows(DomainException.class, () ->
                     ConsultDateTime.of(date, null)
             );
 
@@ -89,7 +90,7 @@ class ConsultDateTimeTest {
             ConsultDateTime consultDateTime = ConsultDateTime.of(pastDate, time);
 
             // When & Then
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            DomainException exception = assertThrows(DomainException.class,
                     consultDateTime::validateFutureDateTime);
 
             assertEquals("Consult date/time cannot be in the past", exception.getMessage());

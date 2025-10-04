@@ -3,14 +3,16 @@ package com.fiap.easyconsult.core.domain.valueobject;
 public enum ConsultStatus {
     SCHEDULED,
     CANCELLED,
-    COMPLETED,
-    NO_SHOW;
+    CARRIED_OUT;
 
     public boolean canBeCancelled() {
         return this == SCHEDULED;
     }
 
     public boolean isFinalized() {
-        return this == COMPLETED || this == CANCELLED || this == NO_SHOW;
+        return switch (this) {
+            case CANCELLED, CARRIED_OUT -> true;
+            default -> false;
+        };
     }
 }

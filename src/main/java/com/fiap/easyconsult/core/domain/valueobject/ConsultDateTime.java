@@ -1,5 +1,7 @@
 package com.fiap.easyconsult.core.domain.valueobject;
 
+import com.fiap.easyconsult.core.exception.DomainException;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -15,7 +17,7 @@ public class ConsultDateTime implements Serializable {
 
     private ConsultDateTime(LocalDate date, LocalTime time) {
         if (date == null || time == null) {
-            throw new IllegalArgumentException("Date and time cannot be null");
+            throw new DomainException("Date and time cannot be null", "CONSTRAINT_VIOLATION");
         }
         this.date = date;
         this.time = time;
@@ -31,7 +33,7 @@ public class ConsultDateTime implements Serializable {
      */
     public void validateFutureDateTime() {
         if (toLocalDateTime().isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Consult date/time cannot be in the past");
+            throw new DomainException("Consult date/time cannot be in the past", "BUSINESS_RULE");
         }
     }
 
@@ -54,8 +56,7 @@ public class ConsultDateTime implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof ConsultDateTime)) return false;
-        ConsultDateTime that = (ConsultDateTime) o;
+        if (!(o instanceof ConsultDateTime that)) return false;
         return Objects.equals(date, that.date) && Objects.equals(time, that.time);
     }
 
