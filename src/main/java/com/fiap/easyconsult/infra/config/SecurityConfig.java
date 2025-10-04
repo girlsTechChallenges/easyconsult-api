@@ -25,6 +25,7 @@ public class SecurityConfig {
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/graphiql/**").permitAll()
+                    .requestMatchers("/api/kafka/**").permitAll()  // Endpoints Kafka públicos
                     .requestMatchers("/graphql", "/graphql/**").authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
