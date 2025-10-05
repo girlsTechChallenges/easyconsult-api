@@ -1,12 +1,12 @@
 # 🏥 EasyConsult API
 
-**Serviço de agendamento de consultas médicas** desenvolvido em Java Spring Boot com arquitetura hexagonal, GraphQL e Apache Kafka.
+**Serviço de agendamento de consultas médicas** desenvolvido em Java Spring Boot com Clean Architecture, GraphQL e Apache Kafka.
 
 ## 📋 Sobre o Projeto
 
 O **EasyConsult** é uma aplicação que permite gerenciar agendamentos de consultas entre pacientes e profissionais de saúde de forma simples e eficiente.
 
-## 🚀 Kafka + Docker (Novo!)
+## 🚀 Kafka + Docker
 
 A aplicação agora inclui **Apache Kafka** para mensageria assíncrona! 
 
@@ -45,7 +45,7 @@ curl -X POST "http://localhost:8081/api/kafka/publish-consult?message=Hello%20Ka
 
 ## 🏗️ Arquitetura
 
-O projeto segue **arquitetura hexagonal (Clean Architecture)** com separação clara de responsabilidades:
+O projeto segue **Clean Architecture** com separação clara de responsabilidades:
 
 - **Core Domain**: Modelos de domínio (`Patient`, `Professional`, `Consult`)
 - **Input Ports**: Interfaces dos casos de uso (`ConsultCommandUseCase`, `ConsultQueryUseCase`)
@@ -125,51 +125,11 @@ O projeto possui **cobertura completa de testes** seguindo as melhores práticas
 | **Redis Cache** | ✅ | ✅ | ✅ | 100% |
 | **Kafka Events** | ✅ Mock | ✅ Mock | ✅ Mock | 100% |
 
-### 🔧 **Estratégias de Teste**
-
-#### **Isolamento de Dependências**
-```java
-// Exemplo: Mock do Kafka para evitar dependências externas
-@Bean
-@Primary
-public KafkaMessageService testKafkaMessageService() {
-    return new TestKafkaMessageService(); // Mock implementation
-}
-```
-
-#### **Base de Dados de Teste**
-```properties
-# application-test.properties
-spring.datasource.url=jdbc:h2:mem:testdb
-spring.jpa.hibernate.ddl-auto=create-drop
-```
-
-#### **Cache de Teste**
-```java
-@Bean
-@Primary
-public CacheManager testCacheManager() {
-    return new ConcurrentMapCacheManager("consults", "allConsults");
-}
-```
-
-### 🚀 **Executando os Testes**
+### **Executando Testes**
 
 ```bash
-# Executar todos os testes
-./mvnw test
-
-# Executar apenas testes unitários
-./mvnw test -Dtest="**/*Test"
-
-# Executar apenas testes de integração
-./mvnw test -Dtest="**/*IntegrationTest"
-
-# Executar apenas testes E2E
-./mvnw test -Dtest="**/*EndToEndTest"
-
-# Relatório de cobertura (se configurado)
-./mvnw jacoco:report
+./mvnw test  # Todos os testes
+./mvnw jacoco:report  # Relatório de cobertura
 ```
 
 ### 📋 **Validações Incluídas**
@@ -181,29 +141,7 @@ public CacheManager testCacheManager() {
 - ✅ **Integrações**: Kafka, Redis, PostgreSQL via mocks/containers
 - ✅ **API Contract**: Validação completa dos contratos GraphQL
 
-### 🎯 **Próximos Passos**
-- [ ] Adicionar testes de carga com JMeter
-- [ ] Implementar testes de mutação (PIT testing)
-- [ ] Configurar relatórios de cobertura automáticos
-- [ ] Adicionar testes de contrato com Pact
 
-### 📊 **Métricas de Qualidade**
-
-| Métrica | Valor | Status |
-|---------|-------|--------|
-| **Taxa de Sucesso** | 100% | ✅ Excelente |
-| **Tempo de Execução** | ~35s | ✅ Rápido |
-| **Cobertura de Código** | 100% | ✅ Completa |
-| **Testes por Categoria** | Balanceado | ✅ Equilibrado |
-| **Isolamento** | 100% | ✅ Independentes |
-| **Manutenibilidade** | Alta | ✅ Bem estruturados |
-
-**🏆 Certificações de Qualidade:**
-- ✅ **Zero Flaky Tests** - Todos os testes são determinísticos
-- ✅ **Fast Feedback** - Execução completa em menos de 40 segundos
-- ✅ **Clean Test Code** - Testes legíveis e bem documentados
-- ✅ **Comprehensive Coverage** - Todas as funcionalidades testadas
-- ✅ **Production Ready** - Pipeline de CI/CD compatible
 
 ## 📊 Status de Consulta
 
@@ -263,78 +201,24 @@ docker-compose --profile infra up -d
 
 ### 🧪 Executando Testes
 
-O projeto possui **111 testes** cobrindo todas as camadas da aplicação:
+O projeto possui **111 testes** cobrindo todas as camadas:
 
 ```bash
-# Executar todos os testes (111 testes)
-./mvnw test
-
-# Executar com relatório detalhado
-./mvnw test -Dmaven.test.redirectTestOutputToFile=false
-
-# Executar testes por categoria
-./mvnw test -Dtest="**/*Test"                    # Unitários (94)
-./mvnw test -Dtest="**/*IntegrationTest"         # Integração (10)  
-./mvnw test -Dtest="**/*EndToEndTest"            # E2E (7)
-
-# Executar teste específico
-./mvnw test -Dtest="GraphQLEndToEndTest"
+./mvnw test  # Todos os testes
+# Resultado: Tests run: 111, Failures: 0, Errors: 0, Skipped: 0
 ```
 
-**✅ Resultados Esperados:**
-```
-Tests run: 111, Failures: 0, Errors: 0, Skipped: 0
-BUILD SUCCESS
-```
-
-### Produção com Docker
+### 🐳 Docker (Produção)
 
 ```bash
+# Ambiente completo (aplicação + infraestrutura)
 docker-compose --profile prod up -d
-```
 
-## 🐳 Docker Setup Completo
-
-### **1. Construir a aplicação**
-```bash
-# Compilar o projeto
-./mvnw clean package -DskipTests
-
-# Ou no Windows
-mvnw.cmd clean package -DskipTests
-```
-
-### **2. Subir apenas a infraestrutura** (recomendado para desenvolvimento)
-```bash
-# Sobe PostgreSQL, Redis, Kafka e Zookeeper
-docker-compose --profile infra up -d
-
-# Executar a aplicação localmente
-./mvnw spring-boot:run
-```
-
-### **3. Subir tudo com Docker** (ambiente completo)
-```bash
-# Sobe toda a stack incluindo a aplicação
-docker-compose --profile prod up -d
-```
-
-### **4. Comandos úteis**
-```bash
-# Parar todos os containers
-docker-compose down
-
-# Parar e remover volumes (CUIDADO: apaga dados)
-docker-compose down -v
-
-# Ver status dos containers
-docker-compose ps
-
-# Ver logs da aplicação
-docker-compose logs -f app
-
-# Ver logs do Kafka
-docker-compose logs -f kafka
+# Comandos úteis
+docker-compose down                    # Parar containers
+docker-compose down -v                 # Parar e remover volumes
+docker-compose ps                      # Ver status
+docker-compose logs -f app            # Logs da aplicação
 ```
 
 ## 📨 Apache Kafka Integration
@@ -360,10 +244,10 @@ app.kafka.groupid=group-consult
 
 #### 1. Integração Automática (Produção)
 
-O Kafka é **integrado automaticamente** no fluxo de criação de consultas. Sempre que uma nova consulta é salva, uma mensagem é enviada automaticamente para o tópico `easyconsult-consult`:
+O Kafka é **integrado automaticamente** no fluxo de criação de consultas. Sempre que uma nova consulta é salva ou alterada, uma mensagem é enviada automaticamente para o tópico `easyconsult-consult`:
 
 ```java
-// No SaveGatewayImpl - Executado automaticamente ao salvar consulta
+// No SaveGatewayImpl - Executado automaticamente ao salvar ou alterar consulta
 kafkaMessageService.publishConsultEvent(result);
 ```
 
@@ -404,17 +288,9 @@ Acesse: http://localhost:8080
 
 #### **Comandos CLI**
 ```bash
-# Listar tópicos
+# Comandos básicos do Kafka
 docker exec kafka kafka-topics --bootstrap-server localhost:9092 --list
-
-# Criar tópico
-docker exec kafka kafka-topics --bootstrap-server localhost:9092 --create --topic meu-topico --partitions 3 --replication-factor 1
-
-# Consumir mensagens
-docker exec kafka kafka-console-consumer --bootstrap-server localhost:9092 --topic meu-topico --from-beginning
-
-# Produzir mensagens
-docker exec -it kafka kafka-console-producer --bootstrap-server localhost:9092 --topic meu-topico
+docker exec kafka kafka-console-consumer --bootstrap-server localhost:9092 --topic easyconsult-consult --from-beginning
 ```
 
 ### 🔧 Configurações do Kafka
@@ -445,30 +321,7 @@ private String detectKafkaBootstrapServers() {
 - **Performance**: `batch.size=16384`, `linger.ms=5`, `buffer.memory=33554432`
 - **Serialização**: `StringSerializer` para chave e valor
 
-### 🔍 Debug do Zookeeper
 
-Comandos úteis para explorar o Zookeeper:
-
-```bash
-# Conectar no Zookeeper CLI
-docker exec -it zookeeper zookeeper-shell localhost:2181
-
-# Dentro do zookeeper-shell:
-ls /
-ls /brokers
-ls /brokers/ids
-ls /config/topics
-
-# Ver informações de um broker
-get /brokers/ids/1
-
-# Ver metadados de tópicos
-ls /brokers/topics
-get /brokers/topics/meu-topico
-
-# Verificar controller
-get /controller
-```
 
 ## 📡 GraphQL API
 
@@ -699,36 +552,17 @@ postman/
 
 ### 🚨 Endpoints Kafka Disponíveis
 ```bash
-✅ POST /api/kafka/publish-consult?message=sua_mensagem  # Funciona
-❌ GET  /api/kafka/status                                # NÃO EXISTE
+✅ POST /api/kafka/publish-consult?message=sua_mensagem  
 ```
 
-### 🔄 Schema GraphQL Atual
-```graphql
-type Query {
-    getAllConsults: [Consult!]!
-    getFilteredConsults(filter: ConsultFilterInput): [Consult!]!
-}
 
-type Mutation {
-    createFullConsult(input: ConsultInput!): Consult!
-    updateConsult(id: ID!, input: ConsultUpdateInput!): Consult!
-    deleteConsult(id: ID!): Boolean!
-}
-
-enum ConsultStatus {
-    SCHEDULED    # Consulta agendada
-    CARRIED_OUT  # Consulta realizada
-    CANCELLED    # Consulta cancelada
-}
-```
 
 ### 🧪 Como Testar
 1. **Importe** as collections atualizadas no Postman
 2. **Selecione** o environment "EasyConsult - Environment"
 3. **Configure** `base_url = http://localhost:8081` (já configurado)
 4. **Execute** os testes - todos devem funcionar sem erros 403/404
-5. **Para Kafka**, use apenas o endpoint `publish-consult`
+5. **Para Kafka**, use o endpoint `publish-consult`
 
 ### ✅ Status das Collections
 - ✅ **1 Collection única** (GraphQL + Kafka consolidados)
@@ -751,8 +585,8 @@ src/
 │   │   ├── outputport/                 # Interfaces de gateways
 │   │   │   ├── SaveGateway.java
 │   │   │   ├── FindByGateway.java
-│   │   │   ├── UpdateGateway.java      # ✨ Novo
-│   │   │   └── DeleteGateway.java      # ✨ Novo
+│   │   │   ├── UpdateGateway.java      
+│   │   │   └── DeleteGateway.java      
 │   │   └── usecase/                    # Implementação dos casos de uso
 │   └── infra/                          # Camada de infraestrutura
 │       ├── adapter/
@@ -760,22 +594,22 @@ src/
 │       │   ├── redis/                  # Cache management
 │       │   └── kafka/                  # Mensageria
 │       ├── config/
-│       │   ├── SecurityConfig.java     # ✅ Atualizado
+│       │   ├── SecurityConfig.java     
 │       │   ├── JwtTokenProvider.java   # Autenticação JWT
 │       │   ├── KafkaProducerConfig.java # Configuração Kafka
 │       │   └── CustomScalarConfig.java # GraphQL scalars
 │       ├── entrypoint/
 │       │   ├── controller/             # GraphQL controllers + Kafka controller
 │       │   ├── dto/                    # DTOs de entrada/saída
-│       │   │   ├── ConsultUpdateRequestDto.java  # ✨ Novo
+│       │   │   ├── ConsultUpdateRequestDto.java  
 │       │   │   └── ...
 │       │   └── mapper/                 # Mapeamento de objetos
 │       └── persistence/                # JPA entities e repositories
 └── resources/
-    ├── graphql/schema.graphqls         # ✅ Schema atualizado
-    ├── application.properties          # ✨ Novo - Config base
-    ├── application-dev.properties      # ✅ Atualizado
-    └── application-prod.properties     # ✅ Atualizado
+    ├── graphql/schema.graphqls         
+    ├── application.properties          
+    ├── application-dev.properties      
+    └── application-prod.properties     
 ```
 
 ## 🧪 Testes Automatizados
@@ -819,41 +653,6 @@ src/test/
 - ✅ **Schema validation**: Introspection e validação de tipos
 - ✅ **Status principal**: **6/6 testes GraphQL passando perfeitamente**
 
-### 🚀 **Execução dos Testes**
-
-```bash
-# Executar todos os testes
-./mvnw test
-
-# Testes por categoria
-./mvnw test -Dtest="com.fiap.easyconsult.unit.**"        # Apenas unitários
-./mvnw test -Dtest="com.fiap.easyconsult.integration.**" # Apenas integração
-
-# Testes específicos importantes
-./mvnw test -Dtest="ConsultTest"                         # Regras de negócio principais
-./mvnw test -Dtest="GraphQLWorkingIntegrationTest"       # GraphQL funcionando (6 testes)
-
-# Com relatório de cobertura
-./mvnw test jacoco:report
-```
-
-### 📊 **Qualidade e Cobertura**
-
-| Categoria | Arquivos | Cobertura | Status |
-|-----------|----------|-----------|--------|
-| **Testes Unitários** | 8 arquivos | 100% domínio | ✅ Completo |
-| **Testes Integração** | 4 arquivos | 100% GraphQL | ✅ Funcionando |
-| **Regras de Negócio** | Todas | 100% | ✅ Validadas |
-| **Endpoints GraphQL** | Todos | 100% | ✅ Testados |
-| **Cenários de Erro** | Abrangente | 100% | ✅ Cobertos |
-
-### 🏆 **Práticas de Excelência**
-- ✅ **TDD**: Estrutura Given-When-Then clara em todos os testes
-- ✅ **Organização**: `@Nested` classes e `@DisplayName` descritivos em português
-- ✅ **Isolamento**: Testes independentes com rollback automático
-- ✅ **Mocking**: Mockito para dependências externas adequadamente utilizado
-- ✅ **Ambiente dedicado**: Profile de teste com H2, cache simples e JWT configurado
-- ✅ **Limpeza**: Estrutura otimizada sem pastas vazias ou arquivos redundantes
 
 ## ⚙️ Configuração de Ambiente
 
@@ -942,7 +741,7 @@ Desenvolvido com ❤️ pela equipe **Girls Tech Challenges**
 - ✅ **Integração Apache Kafka** para eventos de consulta
 - ✅ **Docker Compose** com stack completa (PostgreSQL, Redis, Kafka, Zookeeper)
 - ✅ **Kafka UI** para monitoramento em tempo real
-- ✅ **Arquitetura hexagonal** bem estruturada
+- ✅ **Clean Architecture** bem estruturada
 - ✅ **Testes automatizados** (unitários e integração)
 - ✅ **Interface GraphiQL** para desenvolvimento
 - ✅ **Autenticação JWT** configurada
