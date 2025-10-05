@@ -210,7 +210,7 @@ public CacheManager testCacheManager() {
 | Status | Descrição |
 |--------|-----------|
 | `SCHEDULED` | Consulta agendada |
-| `CONFIRMED` | Consulta confirmada |
+| `CARRIED_OUT` | Consulta realizada |
 | `CANCELLED` | Consulta cancelada |
 
 ## 🔐 Segurança e Autenticação
@@ -344,7 +344,7 @@ docker-compose logs -f kafka
 1. **`KafkaProducerConfig`** - Configuração Spring para o Kafka Producer
 2. **`KafkaMessageService`** - Serviço Spring para envio de mensagens de consultas
 3. **`KafkaController`** - Controlador REST para testes via API
-4. **`ConsultationKafkaMessage`** - DTO para mensagens de consulta no Kafka
+4. **`ConsultKafkaMessage`** - DTO para mensagens de consulta no Kafka
 
 ### ⚙️ Configuração
 
@@ -353,7 +353,7 @@ O projeto está configurado para usar o tópico `easyconsult-consult` definido e
 ```properties
 # Kafka Topics Configuration
 app.kafka.topics.consult=easyconsult-consult
-app.kafka.groupid=group-consulation
+app.kafka.groupid=group-consult
 ```
 
 ### 🚀 Como Usar o Kafka
@@ -364,7 +364,7 @@ O Kafka é **integrado automaticamente** no fluxo de criação de consultas. Sem
 
 ```java
 // No SaveGatewayImpl - Executado automaticamente ao salvar consulta
-kafkaMessageService.publishConsultationEvent(result);
+kafkaMessageService.publishConsultEvent(result);
 ```
 
 A mensagem enviada contém todos os dados da consulta:
@@ -379,7 +379,7 @@ A mensagem enviada contém todos os dados da consulta:
   "localTime": "14:30:00",
   "date": "2025-10-15",
   "reason": "Consulta de rotina",
-  "statusConsulation": "SCHEDULED"
+  "statusConsult": "SCHEDULED"
 }
 ```
 
@@ -481,10 +481,10 @@ get /controller
 ```graphql
 # Buscar todas as consultas
 query {
-  getAllConsultations {
+  getAllConsults {
     id
     reason
-    statusConsultation
+    statusConsult
     date
     localTime
     patient {
@@ -497,7 +497,7 @@ query {
 
 # Buscar consultas com filtros
 query {
-  getFilteredConsultations(filter: {
+  getFilteredConsults(filter: {
     patientEmail: "joao@email.com"
     professionalEmail: "dr.silva@email.com"
     status: SCHEDULED
@@ -505,7 +505,7 @@ query {
   }) {
     id
     reason
-    statusConsultation
+    statusConsult
     date
     localTime
     patient {
@@ -522,7 +522,7 @@ query {
 ```graphql
 # Criar nova consulta
 mutation {
-  createFullConsultation(input: {
+  createFullConsult(input: {
     reason: "Consulta de rotina"
     date: "2025-10-15"
     localTime: "14:30:00"
@@ -537,7 +537,7 @@ mutation {
   }) {
     id
     reason
-    statusConsultation
+    statusConsult
     date
     localTime
     patient {
@@ -550,7 +550,7 @@ mutation {
 
 # Atualizar consulta existente
 mutation {
-  updateConsultation(input: {
+  updateConsult(input: {
     id: "1"
     reason: "Consulta de retorno"
     date: "2025-10-20"
@@ -563,7 +563,7 @@ mutation {
   }) {
     id
     reason
-    statusConsultation
+    statusConsult
     date
     localTime
   }
@@ -571,7 +571,7 @@ mutation {
 
 # Deletar consulta
 mutation {
-  deleteConsultation(id: "1")
+  deleteConsult(id: "1")
 }
 ```
 
@@ -586,7 +586,7 @@ mutation {
 ```graphql
 # 1. Criar uma consulta
 mutation CreateConsult {
-  createFullConsultation(input: {
+  createFullConsult(input: {
     reason: "Consulta de rotina"
     date: "2025-10-15"
     localTime: "14:30:00"
@@ -601,7 +601,7 @@ mutation CreateConsult {
   }) {
     id
     reason
-    statusConsultation
+    statusConsult
     date
     localTime
   }
@@ -609,10 +609,10 @@ mutation CreateConsult {
 
 # 2. Buscar todas as consultas
 query GetAllConsults {
-  getAllConsultations {
+  getAllConsults {
     id
     reason
-    statusConsultation
+    statusConsult
     date
     localTime
     patient {
@@ -625,7 +625,7 @@ query GetAllConsults {
 
 # 3. Atualizar uma consulta
 mutation UpdateConsult {
-  updateConsultation(input: {
+  updateConsult(input: {
     id: "1"
     reason: "Consulta de retorno - ATUALIZADA"
     date: "2025-10-20"
@@ -638,19 +638,19 @@ mutation UpdateConsult {
   }) {
     id
     reason
-    statusConsultation
+    statusConsult
   }
 }
 
 # 4. Buscar por filtros
 query FilterConsults {
-  getFilteredConsultations(filter: {
+  getFilteredConsults(filter: {
     patientEmail: "joao@email.com"
     status: SCHEDULED
   }) {
     id
     reason
-    statusConsultation
+    statusConsult
     patient {
       name
       email
@@ -660,23 +660,83 @@ query FilterConsults {
 
 # 5. Deletar consulta
 mutation DeleteConsult {
-  deleteConsultation(id: "1")
+  deleteConsult(id: "1")
 }
 ```
 
 ## 📫 Testando com Postman
 
+### 📁 Estrutura Simplificada das Collections
+O projeto possui apenas **2 arquivos Postman** otimizados:
+```
+postman/
+├── EasyConsult.postman_collection.json     # 🎯 Collection completa (GraphQL + Kafka)
+└── EasyConsult.postman_environment.json    # 🔐 Environment com JWT tokens
+```
+
 ### Importar Collection
 1. Abra o Postman
 2. Clique em **Import**
-3. Selecione o arquivo [`postman/EasyConsult-API.postman_collection.json`](postman/EasyConsult-API.postman_collection.json)
-4. Importe também o environment [`postman/EasyConsult-Development.postman_environment.json`](postman/EasyConsult-Development.postman_environment.json)
+3. Selecione os 2 arquivos da pasta `postman/`:
+   - `EasyConsult.postman_collection.json` - Collection completa (GraphQL + Kafka)
+   - `EasyConsult.postman_environment.json` - Environment com tokens JWT
+4. **Selecione o environment** "EasyConsult - Environment" no canto superior direito
+5. Pronto! Uma única collection com tudo organizado!
+
+### 🔐 Autenticação JWT Configurada
+**Problema do erro 403 resolvido!** Todos os endpoints têm tokens JWT válidos:
+- ✅ `token_enfermeiro` - Para operações de criação de consultas (`createFullConsult`)
+- ✅ `token_medico` - Para operações de atualização e exclusão (`updateConsult`, `deleteConsult`)
+- ✅ `token_paciente` - Para consultas filtradas por paciente (`getFilteredConsults`)
+- ⏰ **Validade**: 1 ano (sem necessidade de renovação durante desenvolvimento)
 
 ### Collection Inclui
 - 📋 **Queries** - Buscar consultas (todas, por ID, com filtros)
 - ✏️ **Mutations** - Criar, atualizar e deletar consultas
 - 🧪 **Cenários de Teste** - Fluxos completos e testes de filtros
 - 🔍 **Schema Introspection** - Análise do schema GraphQL
+- 📨 **Kafka Producer** - Teste de publicação de mensagens
+
+### 🚨 Endpoints Kafka Disponíveis
+```bash
+✅ POST /api/kafka/publish-consult?message=sua_mensagem  # Funciona
+❌ GET  /api/kafka/status                                # NÃO EXISTE
+```
+
+### 🔄 Schema GraphQL Atual
+```graphql
+type Query {
+    getAllConsults: [Consult!]!
+    getFilteredConsults(filter: ConsultFilterInput): [Consult!]!
+}
+
+type Mutation {
+    createFullConsult(input: ConsultInput!): Consult!
+    updateConsult(id: ID!, input: ConsultUpdateInput!): Consult!
+    deleteConsult(id: ID!): Boolean!
+}
+
+enum ConsultStatus {
+    SCHEDULED    # Consulta agendada
+    CARRIED_OUT  # Consulta realizada
+    CANCELLED    # Consulta cancelada
+}
+```
+
+### 🧪 Como Testar
+1. **Importe** as collections atualizadas no Postman
+2. **Selecione** o environment "EasyConsult - Environment"
+3. **Configure** `base_url = http://localhost:8081` (já configurado)
+4. **Execute** os testes - todos devem funcionar sem erros 403/404
+5. **Para Kafka**, use apenas o endpoint `publish-consult`
+
+### ✅ Status das Collections
+- ✅ **1 Collection única** (GraphQL + Kafka consolidados)
+- ✅ **1 Environment consolidado** (com todos os tokens)
+- ✅ **Estrutura simplificada** (máxima organização)
+- ✅ **Endpoints inexistentes removidos**
+- ✅ **Schema GraphQL sincronizado**
+- ✅ **Testes validados**
 
 ## 📁 Estrutura do Projeto
 
@@ -707,7 +767,7 @@ src/
 │       ├── entrypoint/
 │       │   ├── controller/             # GraphQL controllers + Kafka controller
 │       │   ├── dto/                    # DTOs de entrada/saída
-│       │   │   ├── ConsultationUpdateRequestDto.java  # ✨ Novo
+│       │   │   ├── ConsultUpdateRequestDto.java  # ✨ Novo
 │       │   │   └── ...
 │       │   └── mapper/                 # Mapeamento de objetos
 │       └── persistence/                # JPA entities e repositories
@@ -752,8 +812,8 @@ src/test/
 - ✅ **Use Cases**: Commands e Queries com mocks adequados
 
 #### **🔗 Testes de Integração (TestRestTemplate + H2)**
-- ✅ **Queries GraphQL**: `getAllConsultations`, `getFilteredConsultations` contra schema real
-- ✅ **Mutations GraphQL**: `createFullConsultation`, `updateConsultation`, `deleteConsultation` com persistência
+- ✅ **Queries GraphQL**: `getAllConsults`, `getFilteredConsults` contra schema real
+- ✅ **Mutations GraphQL**: `createFullConsult`, `updateConsult`, `deleteConsult` com persistência
 - ✅ **Fluxos E2E**: Create → Read → Update → Delete completos
 - ✅ **Tratamento de erros**: GraphQL errors, campos inválidos, dados ausentes
 - ✅ **Schema validation**: Introspection e validação de tipos

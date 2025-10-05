@@ -22,17 +22,17 @@ public class ConsultCommandUseCases implements ConsultCommandUseCase {
     }
 
     @Override
-    public Consult createConsultation(Consult consult) {
+    public Consult createConsult(Consult consult) {
         return saveGateway.save(consult);
     }
 
     @Override
-    public Consult updateConsultation(UpdateConsult updateConsult) {
+    public Consult updateConsult(UpdateConsult updateConsult) {
         return updateGateway.update(updateConsult);
     }
 
     @Override
-    public void deleteConsultation(Long consultId) {
+    public void deleteConsult(Long consultId) {
         deleteGateway.delete(consultId);
     }
 

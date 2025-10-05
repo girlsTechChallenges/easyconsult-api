@@ -8,8 +8,8 @@ import java.time.LocalTime;
 
 @Data
 @Entity
-@Table(name = "consultations")
-public class ConsultationEntity {
+@Table(name = "consults")
+public class ConsultEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,7 +30,7 @@ public class ConsultationEntity {
     private String reason;
     private String status;
 
-    public ConsultationEntity(Long id, PatientEntity patient, ProfessionalEntity professional, LocalTime localTime,
+    public ConsultEntity(Long id, PatientEntity patient, ProfessionalEntity professional, LocalTime localTime,
                               LocalDate localDate, String reason, String status) {
         this.id = id;
         this.patient = patient;
@@ -41,5 +41,5 @@ public class ConsultationEntity {
         this.status = status;
     }
 
-    public ConsultationEntity() {}
+    public ConsultEntity() {}
 }

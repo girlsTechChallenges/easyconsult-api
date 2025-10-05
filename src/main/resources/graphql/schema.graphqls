@@ -4,7 +4,7 @@
 scalar LocalTime
 scalar Date
 
-enum ConsultationStatus {
+enum ConsultStatus {
     SCHEDULED
     CARRIED_OUT
     CANCELLED
@@ -15,13 +15,13 @@ type Patient {
     email: String
 }
 
-type ConsultationResponseDto {
+type ConsultResponseDto {
     id: ID!
     patient: Patient
     nameProfessional: String
     localTime: LocalTime
     date: Date
-    statusConsultation: ConsultationStatus
+    statusConsult: ConsultStatus
     reason: String
 }
 
@@ -39,7 +39,7 @@ input ProfessionalDataDto {
     email: String
 }
 
-input ConsultationRequestDto {
+input ConsultRequestDto {
     patient: PatientDataDto!
     professional: ProfessionalDataDto!
     localTime: String!
@@ -47,21 +47,21 @@ input ConsultationRequestDto {
     reason: String!
 }
 
-input ConsultationFilterRequestDto {
+input ConsultFilterRequestDto {
     patientEmail: String
     professionalEmail: String
     localTime: LocalTime
     date: Date
-    status: ConsultationStatus
+    status: ConsultStatus
 }
 
-input ConsultationUpdateRequestDto {
+input ConsultUpdateRequestDto {
     id: ID!
     professional: ProfessionalDataDto
     reason: String
     date: Date
     localTime: LocalTime
-    status: ConsultationStatus
+    status: ConsultStatus
 }
 
 
@@ -70,15 +70,15 @@ input ConsultationUpdateRequestDto {
 # ========================
 
 type Query {
-    getFilteredConsultations(filter: ConsultationFilterRequestDto): [ConsultationResponseDto]
-    getAllConsultations: [ConsultationResponseDto]
+    getFilteredConsults(filter: ConsultFilterRequestDto): [ConsultResponseDto]
+    getAllConsults: [ConsultResponseDto]
 }
 
 # ========================
 # Mutations
 # ========================
 type Mutation {
-    createFullConsultation(input: ConsultationRequestDto): ConsultationResponseDto
-    updateConsultation(input: ConsultationUpdateRequestDto): ConsultationResponseDto
-    deleteConsultation(id: ID!): Boolean
+    createFullConsult(input: ConsultRequestDto): ConsultResponseDto
+    updateConsult(input: ConsultUpdateRequestDto): ConsultResponseDto
+    deleteConsult(id: ID!): Boolean
 }

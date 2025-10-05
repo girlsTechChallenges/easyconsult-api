@@ -68,17 +68,17 @@ class ConsultCommandUseCasesTest {
     }
 
     @Nested
-    @DisplayName("Create Consultation Tests")
-    class CreateConsultationTests {
+    @DisplayName("Create Consult Tests")
+    class createConsultTests {
 
         @Test
-        @DisplayName("Should create consultation successfully")
-        void shouldCreateConsultationSuccessfully() {
+        @DisplayName("Should create consult successfully")
+        void shouldcreateConsultSuccessfully() {
             // Given
             when(saveGateway.save(any(Consult.class))).thenReturn(validConsult);
 
             // When
-            Consult result = consultCommandUseCases.createConsultation(validConsult);
+            Consult result = consultCommandUseCases.createConsult(validConsult);
 
             // Then
             assertNotNull(result);
@@ -99,7 +99,7 @@ class ConsultCommandUseCasesTest {
 
             // When & Then
             RuntimeException exception = assertThrows(RuntimeException.class, () ->
-                    consultCommandUseCases.createConsultation(validConsult)
+                    consultCommandUseCases.createConsult(validConsult)
             );
 
             assertEquals("Database error", exception.getMessage());
@@ -113,7 +113,7 @@ class ConsultCommandUseCasesTest {
             when(saveGateway.save(any(Consult.class))).thenReturn(validConsult);
 
             // When
-            consultCommandUseCases.createConsultation(validConsult);
+            consultCommandUseCases.createConsult(validConsult);
 
             // Then
             verify(saveGateway, times(1)).save(validConsult);
@@ -121,18 +121,18 @@ class ConsultCommandUseCasesTest {
     }
 
     @Nested
-    @DisplayName("Update Consultation Tests")
-    class UpdateConsultationTests {
+    @DisplayName("Update Consult Tests")
+    class updateConsultTests {
 
         @Test
-        @DisplayName("Should update consultation successfully")
-        void shouldUpdateConsultationSuccessfully() {
+        @DisplayName("Should update consult successfully")
+        void shouldupdateConsultSuccessfully() {
             // Given
             UpdateConsult updateConsult = mock(UpdateConsult.class);
             when(updateGateway.update(any(UpdateConsult.class))).thenReturn(validConsult);
 
             // When
-            Consult result = consultCommandUseCases.updateConsultation(updateConsult);
+            Consult result = consultCommandUseCases.updateConsult(updateConsult);
 
             // Then
             assertNotNull(result);
@@ -152,7 +152,7 @@ class ConsultCommandUseCasesTest {
 
             // When & Then
             RuntimeException exception = assertThrows(RuntimeException.class, () ->
-                    consultCommandUseCases.updateConsultation(updateConsult)
+                    consultCommandUseCases.updateConsult(updateConsult)
             );
 
             assertEquals("Update failed", exception.getMessage());
@@ -167,7 +167,7 @@ class ConsultCommandUseCasesTest {
             when(updateGateway.update(any(UpdateConsult.class))).thenReturn(validConsult);
 
             // When
-            consultCommandUseCases.updateConsultation(updateConsult);
+            consultCommandUseCases.updateConsult(updateConsult);
 
             // Then
             verify(updateGateway, times(1)).update(updateConsult);
@@ -175,18 +175,18 @@ class ConsultCommandUseCasesTest {
     }
 
     @Nested
-    @DisplayName("Delete Consultation Tests")
-    class DeleteConsultationTests {
+    @DisplayName("Delete Consult Tests")
+    class deleteConsultTests {
 
         @Test
-        @DisplayName("Should delete consultation successfully")
-        void shouldDeleteConsultationSuccessfully() {
+        @DisplayName("Should delete consult successfully")
+        void shoulddeleteConsultSuccessfully() {
             // Given
             Long consultId = 1L;
             doNothing().when(deleteGateway).delete(any(Long.class));
 
             // When & Then
-            assertDoesNotThrow(() -> consultCommandUseCases.deleteConsultation(consultId));
+            assertDoesNotThrow(() -> consultCommandUseCases.deleteConsult(consultId));
             
             verify(deleteGateway, times(1)).delete(consultId);
         }
@@ -201,7 +201,7 @@ class ConsultCommandUseCasesTest {
 
             // When & Then
             RuntimeException exception = assertThrows(RuntimeException.class, () ->
-                    consultCommandUseCases.deleteConsultation(consultId)
+                    consultCommandUseCases.deleteConsult(consultId)
             );
 
             assertEquals("Delete failed", exception.getMessage());
@@ -216,7 +216,7 @@ class ConsultCommandUseCasesTest {
             doNothing().when(deleteGateway).delete(any(Long.class));
 
             // When
-            consultCommandUseCases.deleteConsultation(consultId);
+            consultCommandUseCases.deleteConsult(consultId);
 
             // Then
             verify(deleteGateway, times(1)).delete(consultId);

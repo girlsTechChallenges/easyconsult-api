@@ -36,8 +36,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @ContextConfiguration(classes = {EasyconsultMain.class, TestConfig.class})
 @ActiveProfiles("test")
 @Transactional
-@DisplayName("Consultation Use Cases Integration Tests")
-class ConsultationUseCasesIntegrationTest {
+@DisplayName("Consult Use Cases Integration Tests")
+class ConsultUseCasesIntegrationTest2 {
 
     @Autowired
     private ConsultCommandUseCase consultCommandUseCase;
@@ -77,7 +77,7 @@ class ConsultationUseCasesIntegrationTest {
         @DisplayName("Deve executar fluxo completo: criar, buscar, atualizar e deletar")
         void shouldExecuteCompleteFlow() {
             // 1. Criar consulta
-            Consult consultation = Consult.builder()
+            Consult consult = Consult.builder()
                     .reason("Consulta de integração completa")
                     .patient(testPatient)
                     .professional(testProfessional)
@@ -85,43 +85,43 @@ class ConsultationUseCasesIntegrationTest {
                     .status(status)
                     .build();
 
-            Consult createdConsultation = consultCommandUseCase.createConsultation(consultation);
+            Consult createdConsult = consultCommandUseCase.createConsult(consult);
 
             // Validar criação
-            assertNotNull(createdConsultation);
-            assertNotNull(createdConsultation.getId());
-            assertTrue(createdConsultation.getId().getValue() > 0);
-            assertEquals("Consulta de integração completa", createdConsultation.getReason());
+            assertNotNull(createdConsult);
+            assertNotNull(createdConsult.getId());
+            assertTrue(createdConsult.getId().getValue() > 0);
+            assertEquals("Consulta de integração completa", createdConsult.getReason());
 
             // 2. Buscar consultas (deve incluir a criada)
-            List<Consult> allConsultations = consultQueryUseCase.findAll();
-            assertNotNull(allConsultations);
-            assertTrue(allConsultations.size() >= 1);
+            List<Consult> allConsults = consultQueryUseCase.findAll();
+            assertNotNull(allConsults);
+            assertTrue(allConsults.size() >= 1);
             
-            boolean consultationExists = allConsultations.stream()
-                    .anyMatch(c -> c.getId().getValue().equals(createdConsultation.getId().getValue()));
-            assertTrue(consultationExists, "Consulta criada deve estar presente na busca");
+            boolean consultExists = allConsults.stream()
+                    .anyMatch(c -> c.getId().getValue().equals(createdConsult.getId().getValue()));
+            assertTrue(consultExists, "Consulta criada deve estar presente na busca");
 
             // 3. Atualizar consulta
             String newReason = "Consulta atualizada via integração";
             UpdateConsult updateConsult = UpdateConsult.builder()
-                    .id(createdConsultation.getId().getValue())
+                    .id(createdConsult.getId().getValue())
                     .reason(newReason)
                     .date(futureDate.plusDays(1))
                     .time(consultTime.plusHours(1))
                     .build();
 
-            Consult updatedConsultation = consultCommandUseCase.updateConsultation(updateConsult);
+            Consult updatedConsult = consultCommandUseCase.updateConsult(updateConsult);
             
             // Validar atualização
-            assertNotNull(updatedConsultation);
-            assertEquals(createdConsultation.getId().getValue(), updatedConsultation.getId().getValue());
-            assertEquals(newReason, updatedConsultation.getReason());
-            assertEquals(futureDate.plusDays(1), updatedConsultation.getDate());
+            assertNotNull(updatedConsult);
+            assertEquals(createdConsult.getId().getValue(), updatedConsult.getId().getValue());
+            assertEquals(newReason, updatedConsult.getReason());
+            assertEquals(futureDate.plusDays(1), updatedConsult.getDate());
 
             // 4. Deletar consulta
-            Long consultationId = createdConsultation.getId().getValue();
-            assertDoesNotThrow(() -> consultCommandUseCase.deleteConsultation(consultationId));
+            Long consultId = createdConsult.getId().getValue();
+            assertDoesNotThrow(() -> consultCommandUseCase.deleteConsult(consultId));
 
             // Nota: Não podemos verificar se foi deletada porque findAll pode lançar exceção
             // quando não há consultas, dependendo da implementação do use case
@@ -129,14 +129,14 @@ class ConsultationUseCasesIntegrationTest {
 
         @Test
         @DisplayName("Deve filtrar consultas por email do paciente")
-        void shouldFilterConsultationsByPatientEmail() {
+        void shouldFilterConsultsByPatientEmail() {
             // Given: Criar consulta para paciente específico
             Patient specificPatient = Patient.builder()
                     .name("Paciente Específico")
                     .email("paciente.especifico@email.com")
                     .build();
 
-            Consult consultation = Consult.builder()
+            Consult consult = Consult.builder()
                     .reason("Consulta para filtro de paciente")
                     .patient(specificPatient)
                     .professional(testProfessional)
@@ -144,27 +144,27 @@ class ConsultationUseCasesIntegrationTest {
                     .status(status)
                     .build();
 
-            consultCommandUseCase.createConsultation(consultation);
+            consultCommandUseCase.createConsult(consult);
 
             // When: Filtrar por email do paciente
-            ConsultationFilter filter = new ConsultationFilter(
+            ConsultFilter filter = new ConsultFilter(
                     null, "paciente.especifico@email.com", null, null, null, null
             );
 
-            List<Consult> filteredConsultations = consultQueryUseCase.findWithFilters(filter);
+            List<Consult> filteredConsults = consultQueryUseCase.findWithFilters(filter);
 
             // Then: Deve retornar apenas consultas do paciente específico
-            assertNotNull(filteredConsultations);
-            assertTrue(filteredConsultations.size() >= 1);
+            assertNotNull(filteredConsults);
+            assertTrue(filteredConsults.size() >= 1);
             
-            filteredConsultations.forEach(c -> 
+            filteredConsults.forEach(c -> 
                 assertEquals("paciente.especifico@email.com", c.getPatient().getEmail())
             );
         }
 
         @Test
         @DisplayName("Deve filtrar consultas por email do profissional")
-        void shouldFilterConsultationsByProfessionalEmail() {
+        void shouldFilterConsultsByProfessionalEmail() {
             // Given: Criar consulta para profissional específico
             Professional specificProfessional = Professional.builder()
                     .name("Dr. Específico")
@@ -177,7 +177,7 @@ class ConsultationUseCasesIntegrationTest {
                     .email("paciente.unico.prof@email.com")
                     .build();
 
-            Consult consultation = Consult.builder()
+            Consult consult = Consult.builder()
                     .reason("Consulta para filtro de profissional")
                     .patient(uniquePatient)
                     .professional(specificProfessional)
@@ -185,20 +185,20 @@ class ConsultationUseCasesIntegrationTest {
                     .status(status)
                     .build();
 
-            consultCommandUseCase.createConsultation(consultation);
+            consultCommandUseCase.createConsult(consult);
 
             // When: Filtrar por email do profissional
-            ConsultationFilter filter = new ConsultationFilter(
+            ConsultFilter filter = new ConsultFilter(
                     null, null, "dr.especifico@hospital.com", null, null, null
             );
 
-            List<Consult> filteredConsultations = consultQueryUseCase.findWithFilters(filter);
+            List<Consult> filteredConsults = consultQueryUseCase.findWithFilters(filter);
 
             // Then: Deve retornar apenas consultas do profissional específico
-            assertNotNull(filteredConsultations);
-            assertTrue(filteredConsultations.size() >= 1);
+            assertNotNull(filteredConsults);
+            assertTrue(filteredConsults.size() >= 1);
             
-            filteredConsultations.forEach(c -> 
+            filteredConsults.forEach(c -> 
                 assertEquals("dr.especifico@hospital.com", c.getProfessional().getEmail())
             );
         }
@@ -210,9 +210,9 @@ class ConsultationUseCasesIntegrationTest {
 
         @Test
         @DisplayName("Deve criar consulta com dados válidos")
-        void shouldCreateConsultationWithValidData() {
+        void shouldcreateConsultWithValidData() {
             // Given: Consulta com dados válidos
-            Consult consultation = Consult.builder()
+            Consult consult = Consult.builder()
                     .reason("Consulta de rotina para validação")
                     .patient(Patient.builder()
                             .name("Paciente Válido")
@@ -224,16 +224,16 @@ class ConsultationUseCasesIntegrationTest {
                     .build();
 
             // When & Then: Criar consulta deve ser bem-sucedido
-            Consult createdConsultation = consultCommandUseCase.createConsultation(consultation);
+            Consult createdConsult = consultCommandUseCase.createConsult(consult);
             
-            assertNotNull(createdConsultation);
-            assertNotNull(createdConsultation.getId());
-            assertEquals("Consulta de rotina para validação", createdConsultation.getReason());
+            assertNotNull(createdConsult);
+            assertNotNull(createdConsult.getId());
+            assertEquals("Consulta de rotina para validação", createdConsult.getReason());
         }
 
         @Test
         @DisplayName("Deve rejeitar consulta com dados inválidos")
-        void shouldRejectConsultationWithInvalidData() {
+        void shouldRejectConsultWithInvalidData() {
             // Given: Consulta com dados inválidos (razão vazia)
             assertThrows(Exception.class, () -> {
                 Consult.builder()
@@ -247,7 +247,7 @@ class ConsultationUseCasesIntegrationTest {
 
         @Test
         @DisplayName("Deve rejeitar consulta com paciente nulo")
-        void shouldRejectConsultationWithNullPatient() {
+        void shouldRejectConsultWithNullPatient() {
             // Given & When & Then: Consulta com paciente nulo deve falhar
             assertThrows(Exception.class, () -> {
                 Consult.builder()
@@ -261,7 +261,7 @@ class ConsultationUseCasesIntegrationTest {
 
         @Test
         @DisplayName("Deve rejeitar consulta com profissional nulo")
-        void shouldRejectConsultationWithNullProfessional() {
+        void shouldRejectConsultWithNullProfessional() {
             // Given & When & Then: Consulta com profissional nulo deve falhar
             assertThrows(Exception.class, () -> {
                 Consult.builder()
@@ -282,7 +282,7 @@ class ConsultationUseCasesIntegrationTest {
         @DisplayName("Deve lidar com filtros que não retornam resultados")
         void shouldHandleFiltersWithNoResults() {
             // Given: Filtro que não deve retornar resultados
-            ConsultationFilter filter = new ConsultationFilter(
+            ConsultFilter filter = new ConsultFilter(
                     null, "email.inexistente@domain.com", null, null, null, null
             );
 
@@ -295,16 +295,16 @@ class ConsultationUseCasesIntegrationTest {
 
         @Test
         @DisplayName("Deve lidar com busca geral quando não há consultas")
-        void shouldHandleFindAllWhenNoConsultations() {
+        void shouldHandleFindAllWhenNoConsults() {
             // Nota: Este teste pode falhar se já existirem consultas de outros testes
             // ou se o use case não lança exceção quando não há resultados
             
             // When & Then: Dependendo da implementação, pode lançar exceção
             // quando não há consultas
             try {
-                List<Consult> consultations = consultQueryUseCase.findAll();
+                List<Consult> consults = consultQueryUseCase.findAll();
                 // Se não lançar exceção, deve pelo menos retornar lista não nula
-                assertNotNull(consultations);
+                assertNotNull(consults);
             } catch (Exception e) {
                 // Aceitar exceção como comportamento válido para "nenhuma consulta encontrada"
                 assertNotNull(e);

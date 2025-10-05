@@ -1,9 +1,19 @@
 {
 	"info": {
-		"_postman_id": "easyconsult-api-collection",
-		"name": "EasyConsult API - GraphQL",
-		"description": "Collection para testar a API GraphQL do EasyConsult - Sistema de agendamento de consultas médicas",
+		"_postman_id": "easyconsult-complete-api",
+		"name": "EasyConsult - Complete API",
+		"description": "Collection completa para testar a API EasyConsult - GraphQL, Kafka e todas as funcionalidades",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token_medico}}",
+				"type": "string"
+			}
+		]
 	},
 	"item": [
 		{
@@ -21,7 +31,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"query\": \"query FindAllConsults {\\n    findAllConsults {\\n      id\\n      reason\\n      status\\n      localDate\\n      localTime\\n      patient {\\n        id\\n        name\\n        email\\n      }\\n      professional {\\n        id\\n        name\\n        email\\n      }\\n    }\\n  }\"\n}"
+							"raw": "{\n  \"query\": \"query GetAllConsults {\\n    getAllConsults {\\n      id\\n      reason\\n      statusConsult\\n      date\\n      localTime\\n      patient {\\n        name\\n        email\\n      }\\n      nameProfessional\\n    }\\n  }\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/graphql",
@@ -47,7 +57,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"query\": \"query FindConsultById($id: ID!) {\\n    findConsultById(id: $id) {\\n      id\\n      reason\\n      status\\n      localDate\\n      localTime\\n      patient {\\n        id\\n        name\\n        email\\n      }\\n      professional {\\n        id\\n        name\\n        email\\n      }\\n    }\\n  }\",\n  \"variables\": {\n    \"id\": \"1\"\n  }\n}"
+							"raw": "{\n  \"query\": \"query GetFilteredConsults($filter: ConsultFilterRequestDto) {\\n    getFilteredConsults(filter: $filter) {\\n      id\\n      reason\\n      statusConsult\\n      date\\n      localTime\\n      patient {\\n        name\\n        email\\n      }\\n      nameProfessional\\n    }\\n  }\",\n  \"variables\": {\n    \"filter\": {\n      \"patientEmail\": \"joao@email.com\"\n    }\n  }\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/graphql",
@@ -73,7 +83,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"query\": \"query FindConsultsByFilter($patientId: ID, $professionalId: ID, $status: ConsultStatus) {\\n    findConsultsByFilter(\\n      patientId: $patientId\\n      professionalId: $professionalId\\n      status: $status\\n    ) {\\n      id\\n      reason\\n      status\\n      localDate\\n      localTime\\n      patient {\\n        name\\n        email\\n      }\\n      professional {\\n        name\\n        email\\n      }\\n    }\\n  }\",\n  \"variables\": {\n    \"patientId\": \"1\",\n    \"professionalId\": null,\n    \"status\": \"SCHEDULED\"\n  }\n}"
+							"raw": "{\n  \"query\": \"query GetFilteredConsults($filter: ConsultFilterRequestDto) {\\n    getFilteredConsults(filter: $filter) {\\n      id\\n      reason\\n      statusConsult\\n      date\\n      localTime\\n      patient {\\n        name\\n        email\\n      }\\n      nameProfessional\\n    }\\n  }\",\n  \"variables\": {\n    \"filter\": {\n      \"patientEmail\": \"joao@email.com\",\n      \"status\": \"SCHEDULED\"\n    }\n  }\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/graphql",
@@ -95,6 +105,16 @@
 				{
 					"name": "Criar Nova Consulta",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_enfermeiro}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [
 							{
@@ -104,7 +124,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"query\": \"mutation CreateConsult($input: ConsultationCreateRequestDto!) {\\n    createConsult(input: $input)\\n  }\",\n  \"variables\": {\n    \"input\": {\n      \"reason\": \"Consulta de rotina\",\n      \"localDate\": \"2025-10-15\",\n      \"localTime\": \"14:30:00\",\n      \"patientId\": 1,\n      \"professionalId\": 1\n    }\n  }\n}"
+							"raw": "{\n  \"query\": \"mutation CreateFullConsult($input: ConsultRequestDto!) {\\n    createFullConsult(input: $input) {\\n      id\\n      reason\\n      statusConsult\\n      date\\n      localTime\\n      patient {\\n        name\\n        email\\n      }\\n      nameProfessional\\n    }\\n  }\",\n  \"variables\": {\n    \"input\": {\n      \"reason\": \"Consulta de rotina\",\n      \"date\": \"2025-10-15\",\n      \"localTime\": \"14:30:00\",\n      \"patient\": {\n        \"name\": \"João Silva\",\n        \"email\": \"joao@email.com\"\n      },\n      \"professional\": {\n        \"name\": \"Dr. Silva\",\n        \"email\": \"dr.silva@email.com\"\n      }\n    }\n  }\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/graphql",
@@ -130,7 +150,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"query\": \"mutation UpdateConsult($input: ConsultationUpdateRequestDto!) {\\n    updateConsult(input: $input)\\n  }\",\n  \"variables\": {\n    \"input\": {\n      \"id\": \"1\",\n      \"reason\": \"Consulta de retorno - ATUALIZADA\",\n      \"localDate\": \"2025-10-20\",\n      \"localTime\": \"15:00:00\",\n      \"status\": \"CONFIRMED\",\n      \"patientId\": 1,\n      \"professionalId\": 1\n    }\n  }\n}"
+							"raw": "{\n  \"query\": \"mutation UpdateConsult($input: ConsultUpdateRequestDto!) {\\n    updateConsult(input: $input) {\\n      id\\n      reason\\n      statusConsult\\n      date\\n      localTime\\n      nameProfessional\\n    }\\n  }\",\n  \"variables\": {\n    \"input\": {\n      \"id\": \"1\",\n      \"reason\": \"Consulta de retorno - ATUALIZADA\",\n      \"date\": \"2025-10-20\",\n      \"localTime\": \"15:00:00\",\n      \"status\": \"CARRIED_OUT\",\n      \"professional\": {\n        \"name\": \"Dr. Silva\",\n        \"email\": \"dr.silva@email.com\"\n      }\n    }\n  }\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/graphql",
@@ -190,7 +210,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"query\": \"mutation {\\n    createConsult(input: {\\n      reason: \\\"Consulta de teste - Fluxo completo\\\"\\n      localDate: \\\"2025-11-01\\\"\\n      localTime: \\\"10:00:00\\\"\\n      patientId: 1\\n      professionalId: 1\\n    })\\n  }\"\n}"
+									"raw": "{\n  \"query\": \"mutation {\\n    createFullConsult(input: {\\n      reason: \\\"Consulta de teste - Fluxo completo\\\"\\n      date: \\\"2025-11-01\\\"\\n      localTime: \\\"10:00:00\\\"\\n      patient: {\\n        name: \\\"João Silva\\\"\\n        email: \\\"joao@email.com\\\"\\n      }\\n      professional: {\\n        name: \\\"Dr. Silva\\\"\\n        email: \\\"dr.silva@email.com\\\"\\n      }\\n    }) {\\n      id\\n      reason\\n      statusConsult\\n      date\\n      localTime\\n    }\\n  }\"\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/graphql",
@@ -215,7 +235,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"query\": \"query {\\n    findAllConsults {\\n      id\\n      reason\\n      status\\n      localDate\\n      localTime\\n    }\\n  }\"\n}"
+									"raw": "{\n  \"query\": \"query {\\n    getAllConsults {\\n      id\\n      reason\\n      statusConsult\\n      date\\n      localTime\\n    }\\n  }\"\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/graphql",
@@ -240,7 +260,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"query\": \"mutation {\\n    updateConsult(input: {\\n      id: \\\"{{consult_id}}\\\"\\n      reason: \\\"Consulta ATUALIZADA - Fluxo completo\\\"\\n      localDate: \\\"2025-11-02\\\"\\n      localTime: \\\"11:00:00\\\"\\n      status: CONFIRMED\\n      patientId: 1\\n      professionalId: 1\\n    })\\n  }\"\n}"
+									"raw": "{\n  \"query\": \"mutation {\\n    updateConsult(input: {\\n      id: \\\"{{consult_id}}\\\"\\n      reason: \\\"Consulta ATUALIZADA - Fluxo completo\\\"\\n      date: \\\"2025-11-02\\\"\\n      localTime: \\\"11:00:00\\\"\\n      status: CARRIED_OUT\\n      professional: {\\n        name: \\\"Dr. Silva\\\"\\n        email: \\\"dr.silva@email.com\\\"\\n      }\\n    }) {\\n      id\\n      reason\\n      statusConsult\\n      date\\n      localTime\\n    }\\n  }\"\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/graphql",
@@ -295,7 +315,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"query\": \"query {\\n    findConsultsByFilter(status: SCHEDULED) {\\n      id\\n      reason\\n      status\\n      localDate\\n      localTime\\n    }\\n  }\"\n}"
+									"raw": "{\n  \"query\": \"query {\\n    getFilteredConsults(filter: {status: SCHEDULED}) {\\n      id\\n      reason\\n      statusConsult\\n      date\\n      localTime\\n    }\\n  }\"\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/graphql",
@@ -309,7 +329,7 @@
 							}
 						},
 						{
-							"name": "Filtrar por Status CONFIRMED",
+							"name": "Filtrar por Status CARRIED_OUT",
 							"request": {
 								"method": "POST",
 								"header": [
@@ -320,7 +340,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"query\": \"query {\\n    findConsultsByFilter(status: CONFIRMED) {\\n      id\\n      reason\\n      status\\n      localDate\\n      localTime\\n    }\\n  }\"\n}"
+									"raw": "{\n  \"query\": \"query {\\n    getFilteredConsults(filter: {status: CARRIED_OUT}) {\\n      id\\n      reason\\n      statusConsult\\n      date\\n      localTime\\n    }\\n  }\"\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/graphql",
@@ -345,7 +365,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"query\": \"query {\\n    findConsultsByFilter(patientId: \\\"1\\\") {\\n      id\\n      reason\\n      status\\n      patient {\\n        name\\n        email\\n      }\\n    }\\n  }\"\n}"
+									"raw": "{\n  \"query\": \"query {\\n    getFilteredConsults(filter: {patientEmail: \\\"joao@email.com\\\"}) {\\n      id\\n      reason\\n      statusConsult\\n      patient {\\n        name\\n        email\\n      }\\n    }\\n  }\"\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/graphql",
@@ -386,6 +406,59 @@
 							],
 							"path": [
 								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "📨 Kafka Producer",
+			"item": [
+				{
+					"name": "Publicar Mensagem no Kafka",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Mensagem publicada com sucesso\", function () {",
+									"    var responseText = pm.response.text();",
+									"    pm.expect(responseText).to.include(\"publicada com sucesso\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/kafka/publish-consult?message=Teste Kafka - Nova consulta",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"kafka",
+								"publish-consult"
+							],
+							"query": [
+								{
+									"key": "message",
+									"value": "Teste Kafka - Nova consulta"
+								}
 							]
 						}
 					},

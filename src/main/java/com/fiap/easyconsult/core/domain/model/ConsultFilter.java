@@ -1,13 +1,15 @@
 package com.fiap.easyconsult.core.domain.model;
 
-import com.fiap.easyconsult.infra.entrypoint.dto.enums.StatusConsultation;
+import com.fiap.easyconsult.core.domain.valueobject.ConsultStatus;
+import lombok.Builder;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-public class ConsultationFilter implements Serializable {
+@Builder
+public class ConsultFilter implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -15,11 +17,11 @@ public class ConsultationFilter implements Serializable {
     private Long id;
     private String patientEmail;
     private String professionalEmail;
-    private StatusConsultation status;
+    private ConsultStatus status;
     private LocalTime localTime;
     private LocalDate date;
 
-    public ConsultationFilter(Long id, String patientEmail, String professionalEmail, StatusConsultation status,
+    public ConsultFilter(Long id, String patientEmail, String professionalEmail, ConsultStatus status,
                               LocalTime localTime, LocalDate date) {
         this.patientEmail = patientEmail;
         this.professionalEmail = professionalEmail;
@@ -64,11 +66,11 @@ public class ConsultationFilter implements Serializable {
         this.date = date;
     }
 
-    public StatusConsultation getStatus() {
+    public ConsultStatus getStatus() {
         return status;
     }
 
-    public void setStatus(StatusConsultation status) {
+    public void setStatus(ConsultStatus status) {
         this.status = status;
     }
 

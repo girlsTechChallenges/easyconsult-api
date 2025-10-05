@@ -7,7 +7,7 @@ import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-public record ConsultationRequestDto(
+public record ConsultRequestDto(
        String reason,
        @Valid
        PatientDataDto patient,
@@ -15,5 +15,4 @@ public record ConsultationRequestDto(
        ProfessionalDataDto professional,
        LocalDate date,
        LocalTime localTime
-) {
-}
+) {}
