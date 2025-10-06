@@ -1,7 +1,7 @@
 package com.fiap.easyconsult.core.usecase;
 
 import com.fiap.easyconsult.core.domain.model.Consult;
-import com.fiap.easyconsult.core.domain.model.ConsultationFilter;
+import com.fiap.easyconsult.core.domain.model.ConsultFilter;
 import com.fiap.easyconsult.core.inputport.ConsultQueryUseCase;
 import com.fiap.easyconsult.core.outputport.FindByGateway;
 import com.fiap.easyconsult.infra.exception.GatewayException;
@@ -20,16 +20,16 @@ public class ConsultQueryUseCases implements ConsultQueryUseCase {
     }
 
     @Override
-    public List<Consult> findWithFilters(ConsultationFilter consultationFilter) {
-        return Optional.ofNullable(gateway.findWithFilters(consultationFilter))
+    public List<Consult> findWithFilters(ConsultFilter consultFilter) {
+        return Optional.ofNullable(gateway.findWithFilters(consultFilter))
                 .filter(list -> !list.isEmpty())
-                .orElseThrow(() -> new GatewayException("No consultations found for the given filter.", "CONSULT_NOT_FOUND"));
+                .orElseThrow(() -> new GatewayException("No consults found for the given filter.", "CONSULT_NOT_FOUND"));
     }
 
     @Override
     public List<Consult> findAll() {
         return Optional.ofNullable(gateway.findAll())
                 .filter(list -> !list.isEmpty())
-                .orElseThrow(() -> new GatewayException("No consultations found.", "CONSULT_NOT_FOUND"));
+                .orElseThrow(() -> new GatewayException("No consults found.", "CONSULT_NOT_FOUND"));
     }
 }

@@ -5,10 +5,10 @@ import com.fiap.easyconsult.core.domain.model.UpdateConsult;
 
 public interface ConsultCommandUseCase {
 
-    Consult createConsultation(Consult consult);
+    Consult createConsult(Consult consult);
     
-    Consult updateConsultation(UpdateConsult updateConsult);
+    Consult updateConsult(UpdateConsult updateConsult);
     
-    void deleteConsultation(Long consultId);
+    void deleteConsult(Long consultId);
 
 }

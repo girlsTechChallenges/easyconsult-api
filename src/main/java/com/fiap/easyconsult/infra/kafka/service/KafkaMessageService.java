@@ -2,7 +2,7 @@ package com.fiap.easyconsult.infra.kafka.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fiap.easyconsult.core.domain.model.Consult;
-import com.fiap.easyconsult.infra.kafka.dto.ConsultationKafkaMessage;
+import com.fiap.easyconsult.infra.kafka.dto.ConsultKafkaMessage;
 import com.fiap.easyconsult.infra.kafka.dto.PatientData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,11 +55,11 @@ public class KafkaMessageService {
         }
     }
 
-    public void publishConsultationEvent(Consult consult) {
+    public void publishConsultEvent(Consult consult) {
         try {            
-            var consultationMessage = buildConsultationMessage(consult);
+            var consultMessage = buildConsultMessage(consult);
 
-            String jsonMessage = objectMapper.writeValueAsString(consultationMessage);
+            String jsonMessage = objectMapper.writeValueAsString(consultMessage);
             
             log.info("📤 Publicando consulta no Kafka - ID: {}, Paciente: {}, Profissional: {}", 
                     consult.getId().getValue(), consult.getPatient().getName(), consult.getProfessional().getName());
@@ -88,8 +88,8 @@ public class KafkaMessageService {
         }
     }
 
-    private ConsultationKafkaMessage buildConsultationMessage(Consult consult) {
-        return new ConsultationKafkaMessage(
+    private ConsultKafkaMessage buildConsultMessage(Consult consult) {
+        return new ConsultKafkaMessage(
             consult.getId().getValue().toString(),
             consult.getProfessional().getName(),
             new PatientData(

@@ -1,31 +1,31 @@
 package com.fiap.easyconsult.infra.entrypoint.mapper;
 
 import com.fiap.easyconsult.core.domain.model.Consult;
-import com.fiap.easyconsult.core.domain.model.ConsultationFilter;
+import com.fiap.easyconsult.core.domain.model.ConsultFilter;
 import com.fiap.easyconsult.core.domain.model.Patient;
 import com.fiap.easyconsult.core.domain.model.Professional;
 import com.fiap.easyconsult.core.domain.model.UpdateConsult;
 import com.fiap.easyconsult.core.domain.valueobject.ConsultDateTime;
 import com.fiap.easyconsult.core.domain.valueobject.ConsultStatus;
 import com.fiap.easyconsult.infra.entrypoint.dto.data.PatientDataDto;
-import com.fiap.easyconsult.infra.entrypoint.dto.request.ConsultationFilterRequestDto;
-import com.fiap.easyconsult.infra.entrypoint.dto.request.ConsultationRequestDto;
-import com.fiap.easyconsult.infra.entrypoint.dto.request.ConsultationUpdateRequestDto;
-import com.fiap.easyconsult.infra.entrypoint.dto.response.ConsultationResponseDto;
-import com.fiap.easyconsult.infra.persistence.entity.ConsultationEntity;
+import com.fiap.easyconsult.infra.entrypoint.dto.request.ConsultFilterRequestDto;
+import com.fiap.easyconsult.infra.entrypoint.dto.request.ConsultRequestDto;
+import com.fiap.easyconsult.infra.entrypoint.dto.request.ConsultUpdateRequestDto;
+import com.fiap.easyconsult.infra.entrypoint.dto.response.ConsultResponseDto;
+import com.fiap.easyconsult.infra.persistence.entity.ConsultEntity;
 import com.fiap.easyconsult.infra.persistence.entity.PatientEntity;
 import com.fiap.easyconsult.infra.persistence.entity.ProfessionalEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static com.fiap.easyconsult.infra.entrypoint.dto.enums.StatusConsultation.SCHEDULED;
-import static com.fiap.easyconsult.infra.entrypoint.dto.enums.StatusConsultation.valueOf;
+import static com.fiap.easyconsult.infra.entrypoint.dto.enums.StatusConsult.SCHEDULED;
+import static com.fiap.easyconsult.infra.entrypoint.dto.enums.StatusConsult.valueOf;
 
 @Component
-public class ConsultationMapper {
+public class ConsultMapper {
 
-    public Consult toConsultation(ConsultationRequestDto request) {
+    public Consult toConsult(ConsultRequestDto request) {
         var dateTime = ConsultDateTime.of(request.date(), request.localTime());
         dateTime.validateFutureDateTime();
 
@@ -42,14 +42,14 @@ public class ConsultationMapper {
                 .reason(request.reason()).build();
     }
 
-    public ConsultationEntity toConsultationEntity(Consult consult){
+    public ConsultEntity toConsultEntity(Consult consult){
         var patientEntity = new PatientEntity(null, consult.getPatient().getName(), consult.getPatient().getEmail());
         var professionalEntity = new ProfessionalEntity(
                 null,
                 consult.getProfessional().getName(),
                 consult.getProfessional().getEmail());
 
-        var entity = new ConsultationEntity();
+        var entity = new ConsultEntity();
         entity.setReason(consult.getReason());
         entity.setPatient(patientEntity);
         entity.setProfessional(professionalEntity);
@@ -60,7 +60,7 @@ public class ConsultationMapper {
 
     }
 
-    public Consult toConsultation(ConsultationEntity entity){
+    public Consult toConsult(ConsultEntity entity){
         var patient = new Patient.Builder()
                 .id(entity.getId())
                 .name(entity.getPatient().getName())
@@ -81,24 +81,24 @@ public class ConsultationMapper {
                 .build();
     }
 
-    public ConsultationFilter toConsultationFilter(ConsultationFilterRequestDto request) {
-        return new ConsultationFilter(
+    public ConsultFilter toConsultFilter(ConsultFilterRequestDto request) {
+        return new ConsultFilter(
                 null,
                 request.patientEmail(),
                 request.professionalEmail(),
-                request.status(),
+                request.status() != null ? ConsultStatus.valueOf(request.status().name()) : null,
                 request.localTime(),
                 request.date()
         );
     }
 
-    public List<ConsultationResponseDto> toConsultationResponse(List<Consult> consults) {
-        return consults.stream().map(this::toConsultationResponse).toList();
+    public List<ConsultResponseDto> toConsultResponse(List<Consult> consults) {
+        return consults.stream().map(this::toConsultResponse).toList();
     }
 
 
-    public ConsultationResponseDto toConsultationResponse(Consult consult) {
-        return new ConsultationResponseDto(
+    public ConsultResponseDto toConsultResponse(Consult consult) {
+        return new ConsultResponseDto(
                 consult.getId().getValue(),
                 new PatientDataDto(
                         consult.getPatient().getName(),
@@ -111,7 +111,7 @@ public class ConsultationMapper {
         );
     }
 
-    public UpdateConsult toUpdateConsult(ConsultationUpdateRequestDto request) {
+    public UpdateConsult toUpdateConsult(ConsultUpdateRequestDto request) {
         var builder = UpdateConsult.builder()
                 .id(request.id());
 

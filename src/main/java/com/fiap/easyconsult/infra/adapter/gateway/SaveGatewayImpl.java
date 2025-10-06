@@ -2,11 +2,11 @@ package com.fiap.easyconsult.infra.adapter.gateway;
 
 import com.fiap.easyconsult.core.domain.model.Consult;
 import com.fiap.easyconsult.core.outputport.SaveGateway;
-import com.fiap.easyconsult.infra.entrypoint.mapper.ConsultationMapper;
+import com.fiap.easyconsult.infra.entrypoint.mapper.ConsultMapper;
 import com.fiap.easyconsult.infra.exception.GatewayException;
 import com.fiap.easyconsult.infra.kafka.service.KafkaMessageService;
-import com.fiap.easyconsult.infra.persistence.entity.ConsultationEntity;
-import com.fiap.easyconsult.infra.persistence.repository.ConsultationRepository;
+import com.fiap.easyconsult.infra.persistence.entity.ConsultEntity;
+import com.fiap.easyconsult.infra.persistence.repository.ConsultRepository;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachePut;
@@ -21,13 +21,13 @@ import java.util.List;
 public class SaveGatewayImpl implements SaveGateway {
 
     private static final String CACHE_ALL_CONSULTS_KEY = "all-consults";
-    private final ConsultationRepository repository;
-    private final ConsultationMapper mapper;
+    private final ConsultRepository repository;
+    private final ConsultMapper mapper;
     private final CacheManager cacheManager;
     private final KafkaMessageService kafkaMessageService;
 
-    public SaveGatewayImpl(ConsultationRepository repository,
-                           ConsultationMapper mapper,
+    public SaveGatewayImpl(ConsultRepository repository,
+                           ConsultMapper mapper,
                            CacheManager cacheManager,
                            KafkaMessageService kafkaMessageService) {
         this.repository = repository;
@@ -39,29 +39,29 @@ public class SaveGatewayImpl implements SaveGateway {
     @Override
     @CachePut(value = "consults", key = "#result.id.value")
     public Consult save(Consult consult) {
-        log.info("Saving consultation: {}", consult);
+        log.info("Saving consult: {}", consult);
 
         checkPatientAndProfessional(consult);
 
-        List<ConsultationEntity> existingConsults = repository.findAllByPatientEmail(consult.getPatient().getEmail());
+        List<ConsultEntity> existingConsults = repository.findAllByPatientEmail(consult.getPatient().getEmail());
 
         checkForDateConflicts(consult, existingConsults);
 
         try {
-            var entity = mapper.toConsultationEntity(consult);
+            var entity = mapper.toConsultEntity(consult);
             var saved = repository.save(entity);
-            var result = mapper.toConsultation(saved);
+            var result = mapper.toConsult(saved);
 
-            log.info("Saved consultation: {}", saved);
-            kafkaMessageService.publishConsultationEvent(result);
+            log.info("Saved consult: {}", saved);
+            kafkaMessageService.publishConsultEvent(result);
 
             updateAllConsultsCache(result);
 
             return result;
 
         } catch (DataAccessException ex) {
-            log.error("Database error while saving consultation", ex);
-            throw new GatewayException("Failed to persist consultation.", "DATABASE_ERROR");
+            log.error("Database error while saving consult", ex);
+            throw new GatewayException("Failed to persist consult.", "DATABASE_ERROR");
         }
     }
 
@@ -71,7 +71,7 @@ public class SaveGatewayImpl implements SaveGateway {
         }
     }
 
-    private void checkForDateConflicts(Consult consult, List<ConsultationEntity> existingConsults) {
+    private void checkForDateConflicts(Consult consult, List<ConsultEntity> existingConsults) {
         var dateConflicts = existingConsults.stream()
                 .anyMatch(c -> c.getLocalDate().isEqual(consult.getDate()) && c.getLocalTime().equals(consult.getTime()));
 
@@ -104,13 +104,13 @@ public class SaveGatewayImpl implements SaveGateway {
                 List<Consult> updatedList = new ArrayList<>(currentList);
                 updatedList.add(result);
                 cache.put(CACHE_ALL_CONSULTS_KEY, updatedList);
-                log.info("Consultation added to cache");
+                log.info("Consult added to cache");
             } else {
-                log.info("Consultation already exists in cache");
+                log.info("Consult already exists in cache");
             }
         } else {
             cache.put(CACHE_ALL_CONSULTS_KEY, List.of(result));
-            log.info("Cache initialized with first consultation");
+            log.info("Cache initialized with first consult");
         }
     }
 }

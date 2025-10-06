@@ -1,7 +1,7 @@
 package com.fiap.easyconsult.unit.usecase;
 
 import com.fiap.easyconsult.core.domain.model.Consult;
-import com.fiap.easyconsult.core.domain.model.ConsultationFilter;
+import com.fiap.easyconsult.core.domain.model.ConsultFilter;
 import com.fiap.easyconsult.core.domain.model.Patient;
 import com.fiap.easyconsult.core.domain.model.Professional;
 import com.fiap.easyconsult.core.domain.valueobject.ConsultStatus;
@@ -34,7 +34,7 @@ class ConsultQueryUseCasesTest {
 
     private ConsultQueryUseCases consultQueryUseCases;
     private List<Consult> validConsultList;
-    private ConsultationFilter validFilter;
+    private ConsultFilter validFilter;
 
     @BeforeEach
     void setUp() {
@@ -62,7 +62,7 @@ class ConsultQueryUseCasesTest {
                 .build();
 
         validConsultList = List.of(consult);
-        validFilter = mock(ConsultationFilter.class);
+        validFilter = mock(ConsultFilter.class);
     }
 
     @Nested
@@ -70,10 +70,10 @@ class ConsultQueryUseCasesTest {
     class FindWithFiltersTests {
 
         @Test
-        @DisplayName("Should return consultations when filter matches results")
-        void shouldReturnConsultationsWhenFilterMatchesResults() {
+        @DisplayName("Should return consults when filter matches results")
+        void shouldReturnConsultsWhenFilterMatchesResults() {
             // Given
-            when(findByGateway.findWithFilters(any(ConsultationFilter.class)))
+            when(findByGateway.findWithFilters(any(ConsultFilter.class)))
                     .thenReturn(validConsultList);
 
             // When
@@ -89,10 +89,10 @@ class ConsultQueryUseCasesTest {
         }
 
         @Test
-        @DisplayName("Should throw exception when no consultations found with filter")
-        void shouldThrowExceptionWhenNoConsultationsFoundWithFilter() {
+        @DisplayName("Should throw exception when No consults found with filter")
+        void shouldThrowExceptionWhenNoConsultsFoundWithFilter() {
             // Given
-            when(findByGateway.findWithFilters(any(ConsultationFilter.class)))
+            when(findByGateway.findWithFilters(any(ConsultFilter.class)))
                     .thenReturn(Collections.emptyList());
 
             // When & Then
@@ -100,7 +100,7 @@ class ConsultQueryUseCasesTest {
                     consultQueryUseCases.findWithFilters(validFilter)
             );
 
-            assertEquals("No consultations found for the given filter.", exception.getMessage());
+            assertEquals("No consults found for the given filter.", exception.getMessage());
             assertEquals("CONSULT_NOT_FOUND", exception.getCode());
             verify(findByGateway, times(1)).findWithFilters(validFilter);
         }
@@ -109,7 +109,7 @@ class ConsultQueryUseCasesTest {
         @DisplayName("Should throw exception when gateway returns null")
         void shouldThrowExceptionWhenGatewayReturnsNull() {
             // Given
-            when(findByGateway.findWithFilters(any(ConsultationFilter.class)))
+            when(findByGateway.findWithFilters(any(ConsultFilter.class)))
                     .thenReturn(null);
 
             // When & Then
@@ -117,7 +117,7 @@ class ConsultQueryUseCasesTest {
                     consultQueryUseCases.findWithFilters(validFilter)
             );
 
-            assertEquals("No consultations found for the given filter.", exception.getMessage());
+            assertEquals("No consults found for the given filter.", exception.getMessage());
             assertEquals("CONSULT_NOT_FOUND", exception.getCode());
             verify(findByGateway, times(1)).findWithFilters(validFilter);
         }
@@ -127,7 +127,7 @@ class ConsultQueryUseCasesTest {
         void shouldPropagateExceptionWhenGatewayFails() {
             // Given
             RuntimeException gatewayException = new RuntimeException("Database error");
-            when(findByGateway.findWithFilters(any(ConsultationFilter.class)))
+            when(findByGateway.findWithFilters(any(ConsultFilter.class)))
                     .thenThrow(gatewayException);
 
             // When & Then
@@ -143,7 +143,7 @@ class ConsultQueryUseCasesTest {
         @DisplayName("Should call gateway with correct filter")
         void shouldCallGatewayWithCorrectFilter() {
             // Given
-            when(findByGateway.findWithFilters(any(ConsultationFilter.class)))
+            when(findByGateway.findWithFilters(any(ConsultFilter.class)))
                     .thenReturn(validConsultList);
 
             // When
@@ -159,8 +159,8 @@ class ConsultQueryUseCasesTest {
     class FindAllTests {
 
         @Test
-        @DisplayName("Should return all consultations when found")
-        void shouldReturnAllConsultationsWhenFound() {
+        @DisplayName("Should return all consults when found")
+        void shouldReturnAllConsultsWhenFound() {
             // Given
             when(findByGateway.findAll()).thenReturn(validConsultList);
 
@@ -177,8 +177,8 @@ class ConsultQueryUseCasesTest {
         }
 
         @Test
-        @DisplayName("Should throw exception when no consultations found")
-        void shouldThrowExceptionWhenNoConsultationsFound() {
+        @DisplayName("Should throw exception when No consults found")
+        void shouldThrowExceptionWhenNoConsultsFound() {
             // Given
             when(findByGateway.findAll()).thenReturn(Collections.emptyList());
 
@@ -187,7 +187,7 @@ class ConsultQueryUseCasesTest {
                     consultQueryUseCases.findAll()
             );
 
-            assertEquals("No consultations found.", exception.getMessage());
+            assertEquals("No consults found.", exception.getMessage());
             assertEquals("CONSULT_NOT_FOUND", exception.getCode());
             verify(findByGateway, times(1)).findAll();
         }
@@ -203,7 +203,7 @@ class ConsultQueryUseCasesTest {
                     consultQueryUseCases.findAll()
             );
 
-            assertEquals("No consultations found.", exception.getMessage());
+            assertEquals("No consults found.", exception.getMessage());
             assertEquals("CONSULT_NOT_FOUND", exception.getCode());
             verify(findByGateway, times(1)).findAll();
         }

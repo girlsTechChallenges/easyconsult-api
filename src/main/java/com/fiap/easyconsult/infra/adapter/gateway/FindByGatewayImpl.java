@@ -1,11 +1,11 @@
 package com.fiap.easyconsult.infra.adapter.gateway;
 
 import com.fiap.easyconsult.core.domain.model.Consult;
-import com.fiap.easyconsult.core.domain.model.ConsultationFilter;
+import com.fiap.easyconsult.core.domain.model.ConsultFilter;
 import com.fiap.easyconsult.core.outputport.FindByGateway;
-import com.fiap.easyconsult.infra.entrypoint.mapper.ConsultationMapper;
-import com.fiap.easyconsult.infra.persistence.entity.ConsultationEntity;
-import com.fiap.easyconsult.infra.persistence.repository.ConsultationRepository;
+import com.fiap.easyconsult.infra.entrypoint.mapper.ConsultMapper;
+import com.fiap.easyconsult.infra.persistence.entity.ConsultEntity;
+import com.fiap.easyconsult.infra.persistence.repository.ConsultRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
@@ -25,21 +25,21 @@ public class FindByGatewayImpl implements FindByGateway {
     @PersistenceContext
     private EntityManager entityManager;
 
-    private final ConsultationRepository repository;
-    private final ConsultationMapper mapper;
+    private final ConsultRepository repository;
+    private final ConsultMapper mapper;
 
-    public FindByGatewayImpl(ConsultationRepository repository, ConsultationMapper mapper) {
+    public FindByGatewayImpl(ConsultRepository repository, ConsultMapper mapper) {
         this.repository = repository;
         this.mapper = mapper;
     }
 
     @Override
     @Cacheable(value = "consultsByFilter", key = "#filter.hashCode()")
-    public List<Consult> findWithFilters(ConsultationFilter filter) {
-        log.info("Searching consultations with filters: {}", filter);
+    public List<Consult> findWithFilters(ConsultFilter filter) {
+        log.info("Searching consults with filters: {}", filter);
 
         try {
-            String consultBase = "SELECT c FROM ConsultationEntity c WHERE 1=1";
+            String consultBase = "SELECT c FROM ConsultEntity c WHERE 1=1";
             Map<String, Object> parameter = new HashMap<>();
             List<String> condition = new ArrayList<>();
 
@@ -48,37 +48,37 @@ public class FindByGatewayImpl implements FindByGateway {
             addCondition(filter.getStatus(), "c.status", "status", condition, parameter, true);
             addCondition(filter.getDate(), "c.localDate", "localDate", condition, parameter);
 
-            String jpql = consultBase + String.join(" AND ", condition);
-            TypedQuery<ConsultationEntity> query = entityManager.createQuery(jpql, ConsultationEntity.class);
+            String jpql = condition.isEmpty() ? consultBase : consultBase + " AND " + String.join(" AND ", condition);
+            TypedQuery<ConsultEntity> query = entityManager.createQuery(jpql, ConsultEntity.class);
             parameter.forEach(query::setParameter);
 
             List<Consult> result = query.getResultList().stream()
-                    .map(mapper::toConsultation)
+                    .map(mapper::toConsult)
                     .toList();
 
-            log.info("Found {} consultations with filters", result.size());
+            log.info("Found {} consults with filters", result.size());
             return result;
 
         } catch (Exception e) {
-            log.error("Error while filtering consultations", e);
+            log.error("Error while filtering consults", e);
             throw e;
         }
     }
 
     @Override
     public List<Consult> findAll() {
-        log.info("Searching all consultations with details");
+        log.info("Searching all consults with details");
 
         try {
             var entities = repository.findAllWithDetails();
-            log.info("Found {} consultations", entities.size());
+            log.info("Found {} consults", entities.size());
 
             return entities.stream()
-                    .map(mapper::toConsultation)
+                    .map(mapper::toConsult)
                     .toList();
 
         } catch (Exception e) {
-            log.error("Error while fetching all consultations", e);
+            log.error("Error while fetching all consults", e);
             throw e;
         }
     }
@@ -91,7 +91,7 @@ public class FindByGatewayImpl implements FindByGateway {
     private void addCondition(Object valor, String campo, String nameParameter,
                               List<String> condition, Map<String, Object> parameter, boolean converterParaString) {
         if (valor != null) {
-            condition.add(" AND " + campo + " = :" + nameParameter);
+            condition.add(campo + " = :" + nameParameter);
             parameter.put(nameParameter, converterParaString ? valor.toString() : valor);
         }
     }

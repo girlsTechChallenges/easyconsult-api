@@ -29,7 +29,7 @@ public class ConsultDateTime implements Serializable {
 
     /**
      * Validates that the date/time is in the future.
-     * Should be called explicitly when scheduling a new consultation.
+     * Should be called explicitly when scheduling a new consult.
      */
     public void validateFutureDateTime() {
         if (toLocalDateTime().isBefore(LocalDateTime.now())) {

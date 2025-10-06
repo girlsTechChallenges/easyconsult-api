@@ -3,11 +3,11 @@ package com.fiap.easyconsult.infra.adapter.gateway;
 import com.fiap.easyconsult.core.domain.model.Consult;
 import com.fiap.easyconsult.core.domain.model.UpdateConsult;
 import com.fiap.easyconsult.core.outputport.UpdateGateway;
-import com.fiap.easyconsult.infra.entrypoint.mapper.ConsultationMapper;
+import com.fiap.easyconsult.infra.entrypoint.mapper.ConsultMapper;
 import com.fiap.easyconsult.infra.exception.GatewayException;
 import com.fiap.easyconsult.infra.kafka.service.KafkaMessageService;
-import com.fiap.easyconsult.infra.persistence.entity.ConsultationEntity;
-import com.fiap.easyconsult.infra.persistence.repository.ConsultationRepository;
+import com.fiap.easyconsult.infra.persistence.entity.ConsultEntity;
+import com.fiap.easyconsult.infra.persistence.repository.ConsultRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachePut;
@@ -23,13 +23,13 @@ public class UpdateGatewayImpl implements UpdateGateway {
 
     private static final String CACHE_ALL_CONSULTS_KEY = "all-consults";
 
-    private final ConsultationRepository repository;
-    private final ConsultationMapper mapper;
+    private final ConsultRepository repository;
+    private final ConsultMapper mapper;
     private final CacheManager cacheManager;
     private final KafkaMessageService kafkaMessageService;
 
-    public UpdateGatewayImpl(ConsultationRepository repository, 
-                            ConsultationMapper mapper,
+    public UpdateGatewayImpl(ConsultRepository repository, 
+                            ConsultMapper mapper,
                             CacheManager cacheManager,
                             KafkaMessageService kafkaMessageService) {
         this.repository = repository;
@@ -41,33 +41,33 @@ public class UpdateGatewayImpl implements UpdateGateway {
     @Override
     @CachePut(value = "consults", key = "#result.id.value")
     public Consult update(UpdateConsult updateConsult) {
-        log.info("Updating consultation with ID: {}", updateConsult.getId().getValue());
+        log.info("Updating consult with ID: {}", updateConsult.getId().getValue());
 
         try {
             var existingEntity = repository.findById(updateConsult.getId().getValue())
                 .orElseThrow(() -> new GatewayException(
-                    "Consultation not found with ID: " + updateConsult.getId().getValue(), 
+                    "Consult not found with ID: " + updateConsult.getId().getValue(), 
                     "CONSULT_NOT_FOUND"));
 
             applyUpdateConsultData(updateConsult, existingEntity);
 
             var savedEntity = repository.save(existingEntity);
-            var result = mapper.toConsultation(savedEntity);
-            kafkaMessageService.publishConsultationEvent(result);
+            var result = mapper.toConsult(savedEntity);
+            kafkaMessageService.publishConsultEvent(result);
 
-            log.info("Successfully updated consultation: {}", result);
+            log.info("Successfully updated consult: {}", result);
             
             updateAllConsultsCache(result);
             
             return result;
 
         } catch (DataAccessException ex) {
-            log.error("Database error while updating consultation", ex);
-            throw new GatewayException("Failed to update consultation.", "DATABASE_ERROR");
+            log.error("Database error while updating consult", ex);
+            throw new GatewayException("Failed to update consult.", "DATABASE_ERROR");
         }
     }
 
-    private void applyUpdateConsultData(UpdateConsult updateConsult, ConsultationEntity existingEntity) {
+    private void applyUpdateConsultData(UpdateConsult updateConsult, ConsultEntity existingEntity) {
         // Update only non-null fields
         if (updateConsult.getReason() != null) {
             existingEntity.setReason(updateConsult.getReason());
@@ -106,17 +106,17 @@ public class UpdateGatewayImpl implements UpdateGateway {
             updatedList.removeIf(c -> c.getId().equals(result.getId()));
             updatedList.add(result);
             cache.put(CACHE_ALL_CONSULTS_KEY, updatedList);
-            log.info("Consultation updated in cache");
+            log.info("Consult updated in cache");
         } else {
             cache.put(CACHE_ALL_CONSULTS_KEY, List.of(result));
-            log.info("Cache initialized with updated consultation");
+            log.info("Cache initialized with updated consult");
         }
 
-        // Clear filters cache since the consultation was updated
+        // Clear filters cache since the consult was updated
         var filterCache = cacheManager.getCache("consultsByFilter");
         if (filterCache != null) {
             filterCache.clear();
-            log.info("Cleared consultsByFilter cache due to consultation update");
+            log.info("Cleared consultsByFilter cache due to consult update");
         }
     }
 }

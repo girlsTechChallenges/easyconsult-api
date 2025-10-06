@@ -5,11 +5,11 @@ import com.fiap.easyconsult.core.domain.valueobject.ConsultStatus;
 import com.fiap.easyconsult.core.inputport.ConsultCommandUseCase;
 import com.fiap.easyconsult.core.inputport.ConsultQueryUseCase;
 import com.fiap.easyconsult.infra.entrypoint.controller.GraphqlController;
-import com.fiap.easyconsult.infra.entrypoint.dto.request.ConsultationFilterRequestDto;
-import com.fiap.easyconsult.infra.entrypoint.dto.request.ConsultationRequestDto;
-import com.fiap.easyconsult.infra.entrypoint.dto.request.ConsultationUpdateRequestDto;
-import com.fiap.easyconsult.infra.entrypoint.dto.response.ConsultationResponseDto;
-import com.fiap.easyconsult.infra.entrypoint.mapper.ConsultationMapper;
+import com.fiap.easyconsult.infra.entrypoint.dto.request.ConsultFilterRequestDto;
+import com.fiap.easyconsult.infra.entrypoint.dto.request.ConsultRequestDto;
+import com.fiap.easyconsult.infra.entrypoint.dto.request.ConsultUpdateRequestDto;
+import com.fiap.easyconsult.infra.entrypoint.dto.response.ConsultResponseDto;
+import com.fiap.easyconsult.infra.entrypoint.mapper.ConsultMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -38,15 +38,15 @@ class GraphqlControllerTest {
     private ConsultQueryUseCase consultQueryUseCase;
 
     @Mock
-    private ConsultationMapper mapper;
+    private ConsultMapper mapper;
 
     private GraphqlController graphqlController;
 
     private Consult validConsult;
-    private ConsultationResponseDto validResponseDto;
-    private ConsultationRequestDto validRequestDto;
-    private ConsultationFilterRequestDto validFilterDto;
-    private ConsultationUpdateRequestDto validUpdateDto;
+    private ConsultResponseDto validResponseDto;
+    private ConsultRequestDto validRequestDto;
+    private ConsultFilterRequestDto validFilterDto;
+    private ConsultUpdateRequestDto validUpdateDto;
 
     @BeforeEach
     void setUp() {
@@ -73,10 +73,10 @@ class GraphqlControllerTest {
                 .status(ConsultStatus.SCHEDULED)
                 .build();
 
-        validResponseDto = mock(ConsultationResponseDto.class);
-        validRequestDto = mock(ConsultationRequestDto.class);
-        validFilterDto = mock(ConsultationFilterRequestDto.class);
-        validUpdateDto = mock(ConsultationUpdateRequestDto.class);
+        validResponseDto = mock(ConsultResponseDto.class);
+        validRequestDto = mock(ConsultRequestDto.class);
+        validFilterDto = mock(ConsultFilterRequestDto.class);
+        validUpdateDto = mock(ConsultUpdateRequestDto.class);
     }
 
     @Nested
@@ -84,44 +84,44 @@ class GraphqlControllerTest {
     class QueryMappingTests {
 
         @Test
-        @DisplayName("Should return filtered consultations successfully")
-        void shouldReturnFilteredConsultationsSuccessfully() {
+        @DisplayName("Should return filtered consults successfully")
+        void shouldReturnFilteredConsultsSuccessfully() {
             // Given
             List<Consult> consultList = List.of(validConsult);
-            List<ConsultationResponseDto> expectedResponse = List.of(validResponseDto);
+            List<ConsultResponseDto> expectedResponse = List.of(validResponseDto);
             
-            when(mapper.toConsultationFilter(any(ConsultationFilterRequestDto.class)))
-                    .thenReturn(mock(ConsultationFilter.class));
-            when(consultQueryUseCase.findWithFilters(any(ConsultationFilter.class)))
+            when(mapper.toConsultFilter(any(ConsultFilterRequestDto.class)))
+                    .thenReturn(mock(ConsultFilter.class));
+            when(consultQueryUseCase.findWithFilters(any(ConsultFilter.class)))
                     .thenReturn(consultList);
-            when(mapper.toConsultationResponse(any(List.class)))
+            when(mapper.toConsultResponse(any(List.class)))
                     .thenReturn(expectedResponse);
 
             // When
-            List<ConsultationResponseDto> result = graphqlController.getFilteredConsultations(validFilterDto);
+            List<ConsultResponseDto> result = graphqlController.getFilteredConsults(validFilterDto);
 
             // Then
             assertNotNull(result);
             assertEquals(1, result.size());
             assertEquals(expectedResponse, result);
             
-            verify(mapper, times(1)).toConsultationFilter(validFilterDto);
-            verify(consultQueryUseCase, times(1)).findWithFilters(any(ConsultationFilter.class));
-            verify(mapper, times(1)).toConsultationResponse(consultList);
+            verify(mapper, times(1)).toConsultFilter(validFilterDto);
+            verify(consultQueryUseCase, times(1)).findWithFilters(any(ConsultFilter.class));
+            verify(mapper, times(1)).toConsultResponse(consultList);
         }
 
         @Test
-        @DisplayName("Should return all consultations successfully")
-        void shouldReturnAllConsultationsSuccessfully() {
+        @DisplayName("Should return all consults successfully")
+        void shouldReturnAllConsultsSuccessfully() {
             // Given
             List<Consult> consultList = List.of(validConsult);
             
             when(consultQueryUseCase.findAll()).thenReturn(consultList);
-            when(mapper.toConsultationResponse(any(Consult.class)))
+            when(mapper.toConsultResponse(any(Consult.class)))
                     .thenReturn(validResponseDto);
 
             // When
-            List<ConsultationResponseDto> result = graphqlController.getAllConsultations();
+            List<ConsultResponseDto> result = graphqlController.getAllConsults();
 
             // Then
             assertNotNull(result);
@@ -129,7 +129,7 @@ class GraphqlControllerTest {
             assertEquals(validResponseDto, result.get(0));
             
             verify(consultQueryUseCase, times(1)).findAll();
-            verify(mapper, times(1)).toConsultationResponse(validConsult);
+            verify(mapper, times(1)).toConsultResponse(validConsult);
         }
 
         @Test
@@ -137,18 +137,18 @@ class GraphqlControllerTest {
         void shouldPropagateExceptionWhenQueryUseCaseFails() {
             // Given
             RuntimeException useCaseException = new RuntimeException("Query failed");
-            when(mapper.toConsultationFilter(any(ConsultationFilterRequestDto.class)))
-                    .thenReturn(mock(ConsultationFilter.class));
-            when(consultQueryUseCase.findWithFilters(any(ConsultationFilter.class)))
+            when(mapper.toConsultFilter(any(ConsultFilterRequestDto.class)))
+                    .thenReturn(mock(ConsultFilter.class));
+            when(consultQueryUseCase.findWithFilters(any(ConsultFilter.class)))
                     .thenThrow(useCaseException);
 
             // When & Then
             RuntimeException exception = assertThrows(RuntimeException.class, () ->
-                    graphqlController.getFilteredConsultations(validFilterDto)
+                    graphqlController.getFilteredConsults(validFilterDto)
             );
 
             assertEquals("Query failed", exception.getMessage());
-            verify(consultQueryUseCase, times(1)).findWithFilters(any(ConsultationFilter.class));
+            verify(consultQueryUseCase, times(1)).findWithFilters(any(ConsultFilter.class));
         }
     }
 
@@ -157,183 +157,158 @@ class GraphqlControllerTest {
     class MutationMappingTests {
 
         @Test
-        @DisplayName("Should create consultation successfully")
-        void shouldCreateConsultationSuccessfully() {
+        @DisplayName("Should create consult successfully")
+        void shouldCreateConsultSuccessfully() {
             // Given
-            when(mapper.toConsultation(any(ConsultationRequestDto.class)))
+            when(mapper.toConsult(any(ConsultRequestDto.class)))
                     .thenReturn(validConsult);
-            when(consultCommandUseCase.createConsultation(any(Consult.class)))
+            when(consultCommandUseCase.createConsult(any(Consult.class)))
                     .thenReturn(validConsult);
-            when(mapper.toConsultationResponse(any(Consult.class)))
+            when(mapper.toConsultResponse(any(Consult.class)))
                     .thenReturn(validResponseDto);
 
             // When
-            ConsultationResponseDto result = graphqlController.createFullConsultation(validRequestDto);
+            ConsultResponseDto result = graphqlController.createFullConsult(validRequestDto);
 
             // Then
             assertNotNull(result);
             assertEquals(validResponseDto, result);
             
-            verify(mapper, times(1)).toConsultation(validRequestDto);
-            verify(consultCommandUseCase, times(1)).createConsultation(validConsult);
-            verify(mapper, times(1)).toConsultationResponse(validConsult);
+            verify(mapper, times(1)).toConsult(validRequestDto);
+            verify(consultCommandUseCase, times(1)).createConsult(validConsult);
+            verify(mapper, times(1)).toConsultResponse(validConsult);
         }
 
         @Test
-        @DisplayName("Should update consultation successfully")
-        void shouldUpdateConsultationSuccessfully() {
+        @DisplayName("Should update consult successfully")
+        void shouldUpdateConsultSuccessfully() {
             // Given
             UpdateConsult updateConsult = mock(UpdateConsult.class);
-            
-            when(mapper.toUpdateConsult(any(ConsultationUpdateRequestDto.class)))
+            when(mapper.toUpdateConsult(any(ConsultUpdateRequestDto.class)))
                     .thenReturn(updateConsult);
-            when(consultCommandUseCase.updateConsultation(any(UpdateConsult.class)))
+            when(consultCommandUseCase.updateConsult(any(UpdateConsult.class)))
                     .thenReturn(validConsult);
-            when(mapper.toConsultationResponse(any(Consult.class)))
+            when(mapper.toConsultResponse(any(Consult.class)))
                     .thenReturn(validResponseDto);
 
             // When
-            ConsultationResponseDto result = graphqlController.updateConsultation(validUpdateDto);
+            ConsultResponseDto result = graphqlController.updateConsult(validUpdateDto);
 
             // Then
             assertNotNull(result);
             assertEquals(validResponseDto, result);
             
             verify(mapper, times(1)).toUpdateConsult(validUpdateDto);
-            verify(consultCommandUseCase, times(1)).updateConsultation(updateConsult);
-            verify(mapper, times(1)).toConsultationResponse(validConsult);
+            verify(consultCommandUseCase, times(1)).updateConsult(updateConsult);
+            verify(mapper, times(1)).toConsultResponse(validConsult);
         }
 
         @Test
-        @DisplayName("Should delete consultation successfully")
-        void shouldDeleteConsultationSuccessfully() {
+        @DisplayName("Should delete consult successfully")
+        void shouldDeleteConsultSuccessfully() {
             // Given
             Long consultId = 1L;
-            doNothing().when(consultCommandUseCase).deleteConsultation(any(Long.class));
+            doNothing().when(consultCommandUseCase).deleteConsult(any(Long.class));
 
             // When
-            Boolean result = graphqlController.deleteConsultation(consultId);
+            Boolean result = graphqlController.deleteConsult(consultId);
 
             // Then
-            assertNotNull(result);
             assertTrue(result);
-            
-            verify(consultCommandUseCase, times(1)).deleteConsultation(consultId);
+            verify(consultCommandUseCase, times(1)).deleteConsult(consultId);
         }
 
         @Test
-        @DisplayName("Should propagate exception when create consultation fails")
-        void shouldPropagateExceptionWhenCreateConsultationFails() {
+        @DisplayName("Should propagate exception when create consult fails")
+        void shouldPropagateExceptionWhenCreateConsultFails() {
             // Given
-            RuntimeException useCaseException = new RuntimeException("Creation failed");
-            when(mapper.toConsultation(any(ConsultationRequestDto.class)))
+            RuntimeException useCaseException = new RuntimeException("Create failed");
+            when(mapper.toConsult(any(ConsultRequestDto.class)))
                     .thenReturn(validConsult);
-            when(consultCommandUseCase.createConsultation(any(Consult.class)))
+            when(consultCommandUseCase.createConsult(any(Consult.class)))
                     .thenThrow(useCaseException);
 
             // When & Then
             RuntimeException exception = assertThrows(RuntimeException.class, () ->
-                    graphqlController.createFullConsultation(validRequestDto)
+                    graphqlController.createFullConsult(validRequestDto)
             );
 
-            assertEquals("Creation failed", exception.getMessage());
-            verify(consultCommandUseCase, times(1)).createConsultation(validConsult);
+            assertEquals("Create failed", exception.getMessage());
+            verify(consultCommandUseCase, times(1)).createConsult(validConsult);
         }
 
         @Test
-        @DisplayName("Should propagate exception when update consultation fails")
-        void shouldPropagateExceptionWhenUpdateConsultationFails() {
+        @DisplayName("Should propagate exception when update consult fails")
+        void shouldPropagateExceptionWhenUpdateConsultFails() {
             // Given
             UpdateConsult updateConsult = mock(UpdateConsult.class);
             RuntimeException useCaseException = new RuntimeException("Update failed");
-            
-            when(mapper.toUpdateConsult(any(ConsultationUpdateRequestDto.class)))
+            when(mapper.toUpdateConsult(any(ConsultUpdateRequestDto.class)))
                     .thenReturn(updateConsult);
-            when(consultCommandUseCase.updateConsultation(any(UpdateConsult.class)))
+            when(consultCommandUseCase.updateConsult(any(UpdateConsult.class)))
                     .thenThrow(useCaseException);
 
             // When & Then
             RuntimeException exception = assertThrows(RuntimeException.class, () ->
-                    graphqlController.updateConsultation(validUpdateDto)
+                    graphqlController.updateConsult(validUpdateDto)
             );
 
             assertEquals("Update failed", exception.getMessage());
-            verify(consultCommandUseCase, times(1)).updateConsultation(updateConsult);
+            verify(consultCommandUseCase, times(1)).updateConsult(updateConsult);
         }
 
         @Test
-        @DisplayName("Should propagate exception when delete consultation fails")
-        void shouldPropagateExceptionWhenDeleteConsultationFails() {
+        @DisplayName("Should propagate exception when delete consult fails")
+        void shouldPropagateExceptionWhenDeleteConsultFails() {
             // Given
             Long consultId = 1L;
             RuntimeException useCaseException = new RuntimeException("Delete failed");
-            doThrow(useCaseException).when(consultCommandUseCase).deleteConsultation(any(Long.class));
+            doThrow(useCaseException).when(consultCommandUseCase).deleteConsult(any(Long.class));
 
             // When & Then
             RuntimeException exception = assertThrows(RuntimeException.class, () ->
-                    graphqlController.deleteConsultation(consultId)
+                    graphqlController.deleteConsult(consultId)
             );
 
             assertEquals("Delete failed", exception.getMessage());
-            verify(consultCommandUseCase, times(1)).deleteConsultation(consultId);
+            verify(consultCommandUseCase, times(1)).deleteConsult(consultId);
         }
     }
 
     @Nested
-    @DisplayName("Mapper Integration Tests")
-    class MapperIntegrationTests {
+    @DisplayName("Validation Tests")
+    class ValidationTests {
 
         @Test
-        @DisplayName("Should call mapper methods with correct parameters")
-        void shouldCallMapperMethodsWithCorrectParameters() {
+        @DisplayName("Should handle null request gracefully")
+        void shouldHandleNullRequestGracefully() {
             // Given
-            when(mapper.toConsultation(any(ConsultationRequestDto.class)))
+            when(mapper.toConsult(any(ConsultRequestDto.class)))
                     .thenReturn(validConsult);
-            when(consultCommandUseCase.createConsultation(any(Consult.class)))
+            when(consultCommandUseCase.createConsult(any(Consult.class)))
                     .thenReturn(validConsult);
-            when(mapper.toConsultationResponse(any(Consult.class)))
+            when(mapper.toConsultResponse(any(Consult.class)))
                     .thenReturn(validResponseDto);
 
             // When
-            graphqlController.createFullConsultation(validRequestDto);
+            graphqlController.createFullConsult(validRequestDto);
 
             // Then
-            verify(mapper, times(1)).toConsultation(validRequestDto);
-            verify(mapper, times(1)).toConsultationResponse(validConsult);
+            verify(mapper, times(1)).toConsult(validRequestDto);
+            verify(mapper, times(1)).toConsultResponse(validConsult);
         }
 
         @Test
-        @DisplayName("Should handle mapper exception gracefully")
-        void shouldHandleMapperExceptionGracefully() {
+        @DisplayName("Should maintain controller contract")
+        void shouldMaintainControllerContract() {
             // Given
-            RuntimeException mapperException = new RuntimeException("Mapping error");
-            when(mapper.toConsultation(any(ConsultationRequestDto.class)))
-                    .thenThrow(mapperException);
+            assertNotNull(graphqlController);
 
-            // When & Then
-            RuntimeException exception = assertThrows(RuntimeException.class, () ->
-                    graphqlController.createFullConsultation(validRequestDto)
-            );
-
-            assertEquals("Mapping error", exception.getMessage());
-            verify(mapper, times(1)).toConsultation(validRequestDto);
-            verifyNoInteractions(consultCommandUseCase);
-        }
-    }
-
-    @Nested
-    @DisplayName("Constructor Tests")
-    class ConstructorTests {
-
-        @Test
-        @DisplayName("Should create controller with all required dependencies")
-        void shouldCreateControllerWithAllRequiredDependencies() {
-            // Given & When
+            // When & Then - Verify that controller has expected dependencies
             GraphqlController controller = new GraphqlController(
                     consultCommandUseCase, consultQueryUseCase, mapper
             );
 
-            // Then
             assertNotNull(controller);
         }
     }

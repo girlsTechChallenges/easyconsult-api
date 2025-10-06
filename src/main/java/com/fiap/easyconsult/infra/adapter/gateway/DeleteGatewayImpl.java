@@ -2,9 +2,9 @@ package com.fiap.easyconsult.infra.adapter.gateway;
 
 import com.fiap.easyconsult.core.domain.model.Consult;
 import com.fiap.easyconsult.core.outputport.DeleteGateway;
-import com.fiap.easyconsult.infra.entrypoint.mapper.ConsultationMapper;
+import com.fiap.easyconsult.infra.entrypoint.mapper.ConsultMapper;
 import com.fiap.easyconsult.infra.exception.GatewayException;
-import com.fiap.easyconsult.infra.persistence.repository.ConsultationRepository;
+import com.fiap.easyconsult.infra.persistence.repository.ConsultRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
 import org.springframework.dao.DataAccessException;
@@ -17,12 +17,12 @@ import java.util.List;
 @Service
 public class DeleteGatewayImpl implements DeleteGateway {
 
-    private final ConsultationRepository repository;
-    private final ConsultationMapper mapper;
+    private final ConsultRepository repository;
+    private final ConsultMapper mapper;
     private final CacheManager cacheManager;
 
-    public DeleteGatewayImpl(ConsultationRepository repository, 
-                            ConsultationMapper mapper,
+    public DeleteGatewayImpl(ConsultRepository repository, 
+                            ConsultMapper mapper,
                             CacheManager cacheManager) {
         this.repository = repository;
         this.mapper = mapper;
@@ -31,25 +31,25 @@ public class DeleteGatewayImpl implements DeleteGateway {
 
     @Override
     public void delete(Long consultId) {
-        log.info("Deleting consultation with ID: {}", consultId);
+        log.info("Deleting consult with ID: {}", consultId);
 
         try {
             var existingEntity = repository.findById(consultId)
                 .orElseThrow(() -> new GatewayException(
-                    "Consultation not found with ID: " + consultId, 
+                    "Consult not found with ID: " + consultId, 
                     "CONSULT_NOT_FOUND"));
 
-            var consultToDelete = mapper.toConsultation(existingEntity);
+            var consultToDelete = mapper.toConsult(existingEntity);
             
             repository.deleteById(consultId);
             
-            log.info("Successfully deleted consultation with ID: {}", consultId);
+            log.info("Successfully deleted consult with ID: {}", consultId);
             
             removeFromCache(consultToDelete);
 
         } catch (DataAccessException ex) {
-            log.error("Database error while deleting consultation", ex);
-            throw new GatewayException("Failed to delete consultation.", "DATABASE_ERROR");
+            log.error("Database error while deleting consult", ex);
+            throw new GatewayException("Failed to delete consult.", "DATABASE_ERROR");
         }
     }
 
@@ -58,7 +58,7 @@ public class DeleteGatewayImpl implements DeleteGateway {
         var cache = cacheManager.getCache("consults");
         if (cache != null) {
             cache.evict(deletedConsult.getId().getValue());
-            log.info("Removed consultation from individual cache");
+            log.info("Removed consult from individual cache");
         }
 
         // Remove from all consults cache
@@ -75,15 +75,15 @@ public class DeleteGatewayImpl implements DeleteGateway {
                 List<Consult> updatedList = new ArrayList<>(currentList);
                 updatedList.removeIf(c -> c.getId().equals(deletedConsult.getId()));
                 allConsultsCache.put("all-consults", updatedList);
-                log.info("Removed consultation from allConsults cache");
+                log.info("Removed consult from allConsults cache");
             }
         }
 
-        // Clear filters cache since the consultation was deleted
+        // Clear filters cache since the consult was deleted
         var filterCache = cacheManager.getCache("consultsByFilter");
         if (filterCache != null) {
             filterCache.clear();
-            log.info("Cleared consultsByFilter cache due to consultation deletion");
+            log.info("Cleared consultsByFilter cache due to consult deletion");
         }
     }
 }

@@ -1,5 +1,8 @@
 package com.fiap.easyconsult.integration.config;
 
+import com.fiap.easyconsult.core.domain.model.Consult;
+import com.fiap.easyconsult.infra.kafka.service.KafkaMessageService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
@@ -59,6 +62,44 @@ public class TestConfig {
     @Primary
     public CacheManager testCacheManager() {
         return new ConcurrentMapCacheManager("consults", "allConsults", "consultsByFilter");
+    }
+
+    /**
+     * Mock do KafkaMessageService para testes.
+     * Substitui o serviço real durante os testes de integração para evitar
+     * dependência de um servidor Kafka real.
+     */
+    @Bean
+    @Primary
+    public KafkaMessageService testKafkaMessageService() {
+        return new TestKafkaMessageService();
+    }
+
+    /**
+     * Implementação mock do KafkaMessageService que simula o comportamento
+     * sem realmente enviar mensagens para o Kafka.
+     */
+    @Slf4j
+    public static class TestKafkaMessageService extends KafkaMessageService {
+        
+        public TestKafkaMessageService() {
+            super(null, null);
+        }
+
+        @Override
+        public void publishConsultMessage(String message) {
+            log.info("🧪 [TEST] Simulando publicação de mensagem no Kafka: {}", message);
+            // Não faz nada - apenas simula o comportamento
+        }
+
+        @Override
+        public void publishConsultEvent(Consult consult) {
+            log.info("🧪 [TEST] Simulando publicação de consulta no Kafka - ID: {}, Paciente: {}, Profissional: {}", 
+                    consult.getId() != null ? consult.getId().getValue() : "N/A", 
+                    consult.getPatient().getName(), 
+                    consult.getProfessional().getName());
+            // Não faz nada - apenas simula o comportamento
+        }
     }
 
 }
