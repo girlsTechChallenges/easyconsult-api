@@ -4,7 +4,6 @@ import com.fiap.easyconsult.EasyconsultMain;
 import com.fiap.easyconsult.integration.config.TestConfig;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -20,10 +19,14 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.security.Key;
+import java.security.KeyFactory;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -457,29 +460,49 @@ public class GraphQLEndToEndTest {
     }
 
     /**
-     * Gera token JWT válido usando a mesma chave secreta da aplicação.
-     * 
-     * Este método replica o mesmo processo de geração de token da aplicação,
-     * garantindo compatibilidade total com o sistema de autenticação.
+     * Gera token JWT válido usando chave privada RSA para os testes.
+     *
+     * Este método utiliza a chave privada RSA correspondente à chave pública
+     * configurada na aplicação para assinar tokens JWT válidos nos testes.
      */
     private String gerarTokenValido(String role) {
-        // Usar a mesma chave secreta configurada no application-test.properties
-        String secret = "test_secret_key_for_integration_tests_at_least_32_bytes_long";
-        Key key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        try {
+            // Carregar a chave privada do arquivo de recursos
+            try (InputStream is = getClass().getClassLoader().getResourceAsStream("app-private.key")) {
+                if (is == null) {
+                    throw new RuntimeException("Arquivo app-private.key não encontrado nos recursos de teste");
+                }
 
-        String email = switch (role) {
-            case "medico" -> "medico@test.com";
-            case "enfermeiro" -> "enfermeiro@test.com";
-            case "paciente" -> "paciente@test.com";
-            default -> "user@test.com";
-        };
+                String privateKeyPem = new String(is.readAllBytes(), StandardCharsets.UTF_8)
+                        .replace("-----BEGIN PRIVATE KEY-----", "")
+                        .replace("-----END PRIVATE KEY-----", "")
+                        .replaceAll("\\s+", "");
 
-        return Jwts.builder()
-                .setSubject(email)
-                .claim("scope", role)  // Importante: usar o role sem prefixo SCOPE_
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 24 horas
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
+                // Decodificar a chave privada
+                byte[] decodedKey = Base64.getDecoder().decode(privateKeyPem);
+
+                // Gerar a chave RSA privada
+                KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+                PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decodedKey);
+                RSAPrivateKey privateKey = (RSAPrivateKey) keyFactory.generatePrivate(keySpec);
+
+                String email = switch (role) {
+                    case "medico" -> "medico@test.com";
+                    case "enfermeiro" -> "enfermeiro@test.com";
+                    case "paciente" -> "paciente@test.com";
+                    default -> "user@test.com";
+                };
+
+                return Jwts.builder()
+                        .setSubject(email)
+                        .claim("scope", role)  // Usar o role sem prefixo SCOPE_
+                        .setIssuedAt(new Date())
+                        .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 24 horas
+                        .signWith(privateKey, SignatureAlgorithm.RS256) // Usar RSA256 em vez de HS256
+                        .compact();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao gerar token JWT com chave RSA", e);
+        }
     }
 }
